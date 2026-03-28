@@ -1,0 +1,431 @@
+### UniWallet API — HTTP Test Collection
+### Use with VS Code REST Client extension or import into Insomnia/Thunder Client
+### Set @baseUrl and @userId before running
+
+@baseUrl = http://localhost:3001
+@userId = seed-user-001
+@billId = REPLACE_WITH_BILL_ID
+@goalId = REPLACE_WITH_GOAL_ID
+@challengeId = REPLACE_WITH_CHALLENGE_ID
+
+# ══════════════════════════════════════════════════════════
+# HEALTH
+# ══════════════════════════════════════════════════════════
+
+### Health check
+GET {{baseUrl}}/health
+
+# ══════════════════════════════════════════════════════════
+# DASHBOARD — start here
+# ══════════════════════════════════════════════════════════
+
+### Get full dashboard (call this first — gives you everything)
+GET {{baseUrl}}/api/dashboard/{{userId}}
+
+# ══════════════════════════════════════════════════════════
+# PROFILE
+# ══════════════════════════════════════════════════════════
+
+### Create profile (onboarding)
+POST {{baseUrl}}/api/profile
+Content-Type: application/json
+
+{
+  "name": "Jordan Park",
+  "school": "University of Waterloo",
+  "studentType": "off_campus",
+  "currentBalance": 623.50,
+  "monthlyIncome": 1200,
+  "payFrequency": "biweekly",
+  "nextPayDate": "2025-04-10T00:00:00.000Z",
+  "city": "Waterloo"
+}
+
+###
+
+### Get profile
+GET {{baseUrl}}/api/profile/{{userId}}
+
+###
+
+### Update profile balance
+PUT {{baseUrl}}/api/profile/{{userId}}
+Content-Type: application/json
+
+{
+  "currentBalance": 950.00,
+  "nextPayDate": "2025-04-14T00:00:00.000Z"
+}
+
+# ══════════════════════════════════════════════════════════
+# BILLS
+# ══════════════════════════════════════════════════════════
+
+### List all bills
+GET {{baseUrl}}/api/bills/{{userId}}
+
+###
+
+### List unpaid bills only
+GET {{baseUrl}}/api/bills/{{userId}}?paid=false
+
+###
+
+### List paid bills only
+GET {{baseUrl}}/api/bills/{{userId}}?paid=true
+
+###
+
+### Create a bill
+POST {{baseUrl}}/api/bills
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "name": "Internet",
+  "amount": 65,
+  "dueDate": "2025-04-08T00:00:00.000Z",
+  "category": "utilities",
+  "priority": "high",
+  "recurring": true
+}
+
+###
+
+### Update a bill (replace billId in variable above)
+PUT {{baseUrl}}/api/bills/{{billId}}
+Content-Type: application/json
+
+{
+  "amount": 70,
+  "dueDate": "2025-04-09T00:00:00.000Z"
+}
+
+###
+
+### Mark bill as paid
+POST {{baseUrl}}/api/bills/{{billId}}/pay
+
+###
+
+### Delete a bill
+DELETE {{baseUrl}}/api/bills/{{billId}}
+
+# ══════════════════════════════════════════════════════════
+# BUDGET FORECAST
+# ══════════════════════════════════════════════════════════
+
+### Run budget forecast
+POST {{baseUrl}}/api/forecast/{{userId}}
+
+# ══════════════════════════════════════════════════════════
+# AI COACH
+# ══════════════════════════════════════════════════════════
+
+### Ask the AI coach (requires OPENAI_API_KEY in .env)
+POST {{baseUrl}}/api/ai/chat
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "message": "Am I going to make it to payday?"
+}
+
+###
+
+### Another AI question
+POST {{baseUrl}}/api/ai/chat
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "message": "What should I pay first this week?"
+}
+
+###
+
+### Can I afford going out
+POST {{baseUrl}}/api/ai/chat
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "message": "Can I afford going out this weekend?"
+}
+
+###
+
+### Get chat history
+GET {{baseUrl}}/api/ai/history/{{userId}}
+
+###
+
+### Get chat history (limited)
+GET {{baseUrl}}/api/ai/history/{{userId}}?limit=5
+
+# ══════════════════════════════════════════════════════════
+# WEEKLY CHALLENGE
+# ══════════════════════════════════════════════════════════
+
+### Get or generate this week's challenge
+GET {{baseUrl}}/api/challenge/{{userId}}
+
+###
+
+### Update challenge progress (replace challengeId above)
+PUT {{baseUrl}}/api/challenge/{{challengeId}}/progress
+Content-Type: application/json
+
+{
+  "progress": 15
+}
+
+###
+
+### Complete a challenge (set progress = target)
+PUT {{baseUrl}}/api/challenge/{{challengeId}}/progress
+Content-Type: application/json
+
+{
+  "progress": 30
+}
+
+# ══════════════════════════════════════════════════════════
+# SIDE HUSTLES
+# ══════════════════════════════════════════════════════════
+
+### All side hustles
+GET {{baseUrl}}/api/side-hustles
+
+###
+
+### Remote only
+GET {{baseUrl}}/api/side-hustles?mode=remote
+
+###
+
+### Local only, limited to 4
+GET {{baseUrl}}/api/side-hustles?mode=local&limit=4
+
+###
+
+### Filter by tags
+GET {{baseUrl}}/api/side-hustles?tags=creative,remote
+
+###
+
+### With city filter (cosmetic for now, data is national)
+GET {{baseUrl}}/api/side-hustles?city=Waterloo&mode=remote&limit=6
+
+# ══════════════════════════════════════════════════════════
+# SAVINGS GOALS
+# ══════════════════════════════════════════════════════════
+
+### Get all saving method descriptions (use for dropdowns)
+GET {{baseUrl}}/api/savings/meta/methods
+
+###
+
+### List all savings goals
+GET {{baseUrl}}/api/savings/{{userId}}
+
+###
+
+### Get a specific goal with contribution history
+GET {{baseUrl}}/api/savings/{{userId}}/{{goalId}}
+
+###
+
+### Create emergency fund goal
+POST {{baseUrl}}/api/savings
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "title": "Emergency Fund",
+  "description": "3 months of expenses as a safety buffer",
+  "targetAmount": 2000,
+  "targetDate": "2025-09-01T00:00:00.000Z",
+  "category": "emergency",
+  "savingMethod": "fixed_weekly",
+  "autoSaveAmount": 25,
+  "autoSaveFreq": "weekly"
+}
+
+###
+
+### Create laptop savings goal
+POST {{baseUrl}}/api/savings
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "title": "New Laptop",
+  "description": "MacBook Air M3 for dev work",
+  "targetAmount": 1499,
+  "targetDate": "2025-08-01T00:00:00.000Z",
+  "category": "tech",
+  "savingMethod": "percentage",
+  "autoSaveAmount": 60,
+  "autoSaveFreq": "biweekly"
+}
+
+###
+
+### Create TFSA goal (education category)
+POST {{baseUrl}}/api/savings
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "title": "TFSA Starter",
+  "description": "First $500 into index funds",
+  "targetAmount": 500,
+  "category": "education",
+  "savingMethod": "spare_change"
+}
+
+###
+
+### Update a goal
+PUT {{baseUrl}}/api/savings/{{goalId}}
+Content-Type: application/json
+
+{
+  "targetAmount": 2500,
+  "autoSaveAmount": 30
+}
+
+###
+
+### Add contribution to a goal
+POST {{baseUrl}}/api/savings/{{goalId}}/contribute
+Content-Type: application/json
+
+{
+  "amount": 50,
+  "note": "Tutoring payout this week"
+}
+
+###
+
+### Add contribution (no note)
+POST {{baseUrl}}/api/savings/{{goalId}}/contribute
+Content-Type: application/json
+
+{
+  "amount": 100
+}
+
+###
+
+### Delete a goal
+DELETE {{baseUrl}}/api/savings/{{goalId}}
+
+# ══════════════════════════════════════════════════════════
+# EDUCATION
+# ══════════════════════════════════════════════════════════
+
+### Get all education modules
+GET {{baseUrl}}/api/education/modules
+
+###
+
+### Get modules by category
+GET {{baseUrl}}/api/education/modules?category=budgeting
+
+###
+
+### Get modules by category — investing
+GET {{baseUrl}}/api/education/modules?category=investing
+
+###
+
+### Get modules by category — savings
+GET {{baseUrl}}/api/education/modules?category=savings
+
+###
+
+### Get a specific module
+GET {{baseUrl}}/api/education/modules/budgeting-101
+
+###
+
+### Get all modules with user progress
+GET {{baseUrl}}/api/education/{{userId}}
+
+###
+
+### Complete a module (budgeting-101)
+POST {{baseUrl}}/api/education/{{userId}}/complete/budgeting-101
+
+###
+
+### Complete a module (credit-basics)
+POST {{baseUrl}}/api/education/{{userId}}/complete/credit-basics
+
+###
+
+### Complete a module (emergency-fund)
+POST {{baseUrl}}/api/education/{{userId}}/complete/emergency-fund
+
+###
+
+### Complete a module (investing-young)
+POST {{baseUrl}}/api/education/{{userId}}/complete/investing-young
+
+###
+
+### Complete a module (student-taxes)
+POST {{baseUrl}}/api/education/{{userId}}/complete/student-taxes
+
+###
+
+### Complete a module (side-hustle-basics)
+POST {{baseUrl}}/api/education/{{userId}}/complete/side-hustle-basics
+
+###
+
+### Complete a module (debt-paydown)
+POST {{baseUrl}}/api/education/{{userId}}/complete/debt-paydown
+
+###
+
+### Complete a module (rrsp-tfsa)
+POST {{baseUrl}}/api/education/{{userId}}/complete/rrsp-tfsa
+
+# ══════════════════════════════════════════════════════════
+# VALIDATION ERROR EXAMPLES — confirm these return 422
+# ══════════════════════════════════════════════════════════
+
+### Missing required field — should return 422
+POST {{baseUrl}}/api/profile
+Content-Type: application/json
+
+{
+  "name": "Test"
+}
+
+###
+
+### Invalid enum — should return 422
+POST {{baseUrl}}/api/bills
+Content-Type: application/json
+
+{
+  "userId": "{{userId}}",
+  "name": "Test Bill",
+  "amount": 50,
+  "dueDate": "2025-04-01T00:00:00.000Z",
+  "category": "INVALID_CATEGORY"
+}
+
+###
+
+### Negative amount — should return 422
+POST {{baseUrl}}/api/savings/{{goalId}}/contribute
+Content-Type: application/json
+
+{
+  "amount": -50
+}

@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id             String   @id @default(cuid())
+  name           String
+  school         String
+  studentType    String   // "living_at_home" | "dorm" | "off_campus"
+  currentBalance Float    @default(0)
+  monthlyIncome  Float    @default(0)
+  payFrequency   String   @default("biweekly") // "weekly" | "biweekly" | "monthly"
+  nextPayDate    DateTime
+  city           String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  bills      Bill[]
+  challenges Challenge[]
+  chatMessages ChatMessage[]
+  savingsGoals SavingsGoal[]
+  educationResources EducationProgress[]
+}
+
+model Bill {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  amount    Float
+  dueDate   DateTime
+  category  String   // "rent" | "tuition" | "utilities" | "phone" | "transit" | "groceries" | "subscriptions" | "other"
+  priority  String   @default("medium") // "high" | "medium" | "low"
+  recurring Boolean  @default(false)
+  isPaid    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Challenge {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String
+  progress    Float    @default(0)
+  target      Float
+  streak      Int      @default(0)
+  rewardLabel String
+  status      String   @default("active") // "active" | "completed" | "failed" | "skipped"
+  weekStart   DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  profile Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  role      String   // "user" | "assistant"
+  content   String
+  timestamp DateTime @default(now())
+
+  profile Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SavingsGoal {
+  id             String   @id @default(cuid())
+  userId         String
+  title          String
+  description    String   @default("")
+  targetAmount   Float
+  currentAmount  Float    @default(0)
+  targetDate     DateTime?
+  category       String   @default("general") // "emergency" | "education" | "travel" | "tech" | "general" | "housing"
+  savingMethod   String   @default("manual") // "round_up" | "percentage" | "fixed_weekly" | "spare_change" | "manual"
+  autoSaveAmount Float?   // For fixed/percentage methods
+  autoSaveFreq   String?  // "weekly" | "biweekly" | "monthly"
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  profile      Profile           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contributions SavingsContribution[]
+}
+
+model SavingsContribution {
+  id            String   @id @default(cuid())
+  goalId        String
+  amount        Float
+  note          String?
+  contributedAt DateTime @default(now())
+
+  goal SavingsGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+}
+
+model EducationProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  moduleId    String
+  title       String
+  category    String   // "budgeting" | "credit" | "investing" | "taxes" | "side_hustles" | "savings"
+  completed   Boolean  @default(false)
+  completedAt DateTime?
+  xpEarned    Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  profile Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
