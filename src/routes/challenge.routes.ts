@@ -33,7 +33,6 @@ router.get("/:userId", async (req: Request, res: Response) => {
       });
       const insight = computeForecast(
         profile.currentBalance,
-        profile.monthlyIncome,
         profile.nextPayDate,
         bills
       );

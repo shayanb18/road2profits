@@ -9,7 +9,7 @@ A student enters their balance, income, pay schedule and bills. UniWallet foreca
 | Folder | What it is | Stack |
 |:--|:--|:--|
 | `/` (root) | Backend REST API | Express, TypeScript, Prisma, Supabase Postgres, OpenAI `gpt-4o-mini`, zod |
-| `frontend/` | Web app: onboarding, dashboard, bills, coach, challenge, insights | Next.js 16, React 19, Tailwind, shadcn/ui |
+| `frontend/` | Web app: onboarding, dashboard, bills, coach, challenge, insights | Next.js 16, React 19, Tailwind |
 | `frontend-client/` | Typed API client (`api.ts`) and React hooks (`hooks.ts`) for calling the backend; see `frontend-client/USAGE.md` | TypeScript |
 | `tests.http` | Example requests for every endpoint (VS Code REST Client) | |
 
@@ -593,7 +593,7 @@ road2profits/
 ├── frontend/                  # Next.js web app (runs on its own, see "Current state")
 │   └── src/
 │       ├── app/               # Pages: onboarding, dashboard, bills, coach, challenge, insights
-│       ├── components/        # Sidebar + shadcn/ui components
+│       ├── components/        # Sidebar
 │       ├── hooks/useProfile.ts
 │       ├── lib/forecast.ts    # Client-side budget forecast
 │       └── types/index.ts
@@ -604,7 +604,7 @@ road2profits/
 │   ├── index.ts               # Server entry point
 │   ├── app.ts                 # Express app + middleware + routes
 │   ├── types/
-│   │   └── index.ts           # All TypeScript types & interfaces (missing, see Known issues)
+│   │   └── index.ts           # All TypeScript types & interfaces
 │   ├── lib/
 │   │   ├── prisma.ts          # Prisma client singleton
 │   │   ├── openai.ts          # OpenAI client
@@ -641,7 +641,6 @@ road2profits/
 
 ## Known issues
 
-- `src/types/index.ts` isn't committed, but nine backend files import from `../types`, so `npm run build` fails until it's added back.
 - The frontend doesn't call the backend yet (see "Current state" above).
 - The rate limiter keeps its counts in memory, so they reset on restart and aren't shared between instances.
 
