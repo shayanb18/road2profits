@@ -1,10 +1,36 @@
-# UniWallet Backend API
+# UniWallet
 
-AI-powered financial survival assistant for university students.
+AI-powered financial survival assistant for university students. Built at a hackathon in March 2026 by Shayan Baig and Mannix Graham.
+
+A student enters their balance, income, pay schedule and bills. UniWallet forecasts whether they make it to the next paycheck, says which bills to pay first, and adds an AI money coach, weekly saving challenges, savings goals, side-hustle ideas and short finance lessons.
+
+## What's in this repo
+
+| Folder | What it is | Stack |
+|:--|:--|:--|
+| `/` (root) | Backend REST API | Express, TypeScript, Prisma, Supabase Postgres, OpenAI `gpt-4o-mini`, zod |
+| `frontend/` | Web app: onboarding, dashboard, bills, coach, challenge, insights | Next.js 16, React 19, Tailwind, shadcn/ui |
+| `frontend-client/` | Typed API client (`api.ts`) and React hooks (`hooks.ts`) for calling the backend; see `frontend-client/USAGE.md` | TypeScript |
+| `tests.http` | Example requests for every endpoint (VS Code REST Client) | |
+
+**Current state:** the frontend runs on its own. It stores the profile, bills and challenge in `localStorage` and computes the forecast and coach replies in the browser (`frontend/src/lib/forecast.ts`). It doesn't call the backend yet. `frontend-client/` is the planned bridge between the two.
 
 ---
 
 ## Quick Start
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+# → http://localhost:3000
+```
+
+No environment variables or backend needed.
+
+### Backend
 
 ```bash
 # 1. Install dependencies
@@ -563,18 +589,30 @@ Returns single module.
 ## File Structure
 
 ```
-uniwallet-backend/
+road2profits/
+├── frontend/                  # Next.js web app (runs on its own, see "Current state")
+│   └── src/
+│       ├── app/               # Pages: onboarding, dashboard, bills, coach, challenge, insights
+│       ├── components/        # Sidebar + shadcn/ui components
+│       ├── hooks/useProfile.ts
+│       ├── lib/forecast.ts    # Client-side budget forecast
+│       └── types/index.ts
+├── frontend-client/           # api.ts + hooks.ts for calling the backend, USAGE.md
 ├── prisma/
 │   └── schema.prisma          # DB schema (Profile, Bill, Challenge, SavingsGoal, EducationProgress, ChatMessage)
 ├── src/
 │   ├── index.ts               # Server entry point
 │   ├── app.ts                 # Express app + middleware + routes
 │   ├── types/
-│   │   └── index.ts           # All TypeScript types & interfaces
+│   │   └── index.ts           # All TypeScript types & interfaces (missing, see Known issues)
 │   ├── lib/
 │   │   ├── prisma.ts          # Prisma client singleton
 │   │   ├── openai.ts          # OpenAI client
 │   │   └── response.ts        # ok() / fail() / serverError() helpers
+│   ├── middleware/
+│   │   ├── rateLimit.ts       # In-memory rate limiter (hackathon-grade)
+│   │   ├── schemas.ts         # zod request schemas
+│   │   └── validate.ts        # Request validation middleware
 │   ├── routes/
 │   │   ├── profile.routes.ts
 │   │   ├── bills.routes.ts
@@ -598,6 +636,14 @@ uniwallet-backend/
 ├── package.json
 └── tsconfig.json
 ```
+
+---
+
+## Known issues
+
+- `src/types/index.ts` isn't committed, but nine backend files import from `../types`, so `npm run build` fails until it's added back.
+- The frontend doesn't call the backend yet (see "Current state" above).
+- The rate limiter keeps its counts in memory, so they reset on restart and aren't shared between instances.
 
 ---
 
