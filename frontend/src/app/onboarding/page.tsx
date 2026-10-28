@@ -1,12 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { StudentType, PayFrequency, Bill, BillPriority } from "@/types";
+import { api, setUserId } from "@/lib/api";
+import { HomeIcon, BuildingLibraryIcon, BuildingOffice2Icon, XMarkIcon, CheckIcon } from "@heroicons/react/24/outline";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface OnboardingData {
+  name: string;
+  school: string;
+  city: string;
   studentType: StudentType | null;
   currentBalance: string;
   monthlyIncome: string;
@@ -21,25 +26,25 @@ const TOTAL_STEPS = 4;
 
 const studentOptions: {
   value: StudentType;
-  icon: string;
+  Icon: typeof HomeIcon;
   title: string;
   description: string;
 }[] = [
   {
     value: "living_at_home",
-    icon: "⌂",
+    Icon: HomeIcon,
     title: "Living at Home",
     description: "Staying with family, lower overhead costs",
   },
   {
     value: "dorm",
-    icon: "◫",
+    Icon: BuildingLibraryIcon,
     title: "Student Dorm",
     description: "On-campus housing, meals included",
   },
   {
     value: "off_campus",
-    icon: "◻",
+    Icon: BuildingOffice2Icon,
     title: "Off Campus",
     description: "Renting your own place, full expenses",
   },
@@ -153,7 +158,7 @@ function Step1({
       <p className="text-sm text-neutral-500 mb-8">
         This helps us calibrate your financial baseline.
       </p>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {studentOptions.map((opt) => {
           const active = data.studentType === opt.value;
           return (
@@ -168,10 +173,10 @@ function Step1({
               }}
             >
               <div
-                className="text-2xl mb-4 w-10 h-10 rounded-lg flex items-center justify-center"
-                style={{ background: active ? "#1a1a1a" : "#141414" }}
+                className="mb-4 w-10 h-10 rounded-lg flex items-center justify-center"
+                style={{ background: active ? "#1a1a1a" : "#141414", color: active ? "#3b82f6" : "#777" }}
               >
-                {opt.icon}
+                <opt.Icon aria-hidden className="w-5 h-5" />
               </div>
               <p
                 className="text-[14px] font-semibold mb-1.5"
@@ -201,9 +206,21 @@ function Step2({
     <div>
       <h2 className="text-2xl font-semibold text-white mb-2">Your money situation</h2>
       <p className="text-sm text-neutral-500 mb-8">
-        We'll use this to project your balance before your next payday.
+        We&apos;ll use this to project your balance before your next payday.
       </p>
-      <div className="grid grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="sm:col-span-2">
+          <FieldLabel>Your Name</FieldLabel>
+          <StyledInput placeholder="e.g. Priya" value={data.name} onChange={(v) => onField("name", v)} />
+        </div>
+        <div>
+          <FieldLabel>School</FieldLabel>
+          <StyledInput placeholder="e.g. Wilfrid Laurier University" value={data.school} onChange={(v) => onField("school", v)} />
+        </div>
+        <div>
+          <FieldLabel>City</FieldLabel>
+          <StyledInput placeholder="e.g. Waterloo" value={data.city} onChange={(v) => onField("city", v)} />
+        </div>
         <div>
           <FieldLabel>Current Balance</FieldLabel>
           <StyledInput
@@ -297,7 +314,7 @@ function Step3({
     <div>
       <h2 className="text-2xl font-semibold text-white mb-2">What do you owe?</h2>
       <p className="text-sm text-neutral-500 mb-8">
-        Add recurring bills — rent, utilities, subscriptions. You can skip this for now.
+        Add recurring bills: rent, utilities, subscriptions. You can skip this for now.
       </p>
 
       {/* Add bill form */}
@@ -308,7 +325,7 @@ function Step3({
         <p className="text-[11px] uppercase tracking-[0.16em] text-neutral-600 mb-4">
           New Bill
         </p>
-        <div className="grid grid-cols-4 gap-4 mb-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
           <div className="col-span-2">
             <FieldLabel>Bill Name</FieldLabel>
             <StyledInput
@@ -339,7 +356,7 @@ function Step3({
         </div>
 
         {/* Priority selector */}
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex flex-wrap items-center gap-3 mb-4">
           <span className="text-[11px] uppercase tracking-[0.16em] text-neutral-600">
             Priority
           </span>
@@ -397,7 +414,7 @@ function Step3({
           {data.bills.map((bill, i) => (
             <div
               key={bill.id}
-              className="flex items-center justify-between px-5 py-3.5"
+              className="flex flex-wrap items-center justify-between gap-x-5 gap-y-2 px-5 py-3.5"
               style={{
                 background: i % 2 === 0 ? "#0a0a0a" : "#0c0c0c",
                 borderBottom:
@@ -436,12 +453,13 @@ function Step3({
                 </span>
                 <button
                   onClick={() => onRemoveBill(bill.id)}
-                  className="text-[12px] transition-colors"
+                  aria-label={`Remove ${bill.name}`}
+                  className="transition-colors"
                   style={{ color: "#333" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = "#ef4444")}
                   onMouseLeave={(e) => (e.currentTarget.style.color = "#333")}
                 >
-                  ✕
+                  <XMarkIcon aria-hidden className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -452,7 +470,7 @@ function Step3({
           className="rounded-xl py-10 text-center"
           style={{ border: "1px dashed #1e1e1e" }}
         >
-          <p className="text-[13px] text-neutral-700">No bills added yet — that's fine.</p>
+          <p className="text-[13px] text-neutral-700">No bills added yet. That&apos;s fine.</p>
         </div>
       )}
     </div>
@@ -464,6 +482,9 @@ function Step4({ data }: { data: OnboardingData }) {
   const totalBills = data.bills.reduce((s, b) => s + b.amount, 0);
 
   const rows: { label: string; value: string }[] = [
+    { label: "Name", value: data.name.trim() || "—" },
+    { label: "School", value: data.school.trim() || "—" },
+    { label: "City", value: data.city.trim() || "—" },
     { label: "Living situation", value: studentLabel?.title ?? "—" },
     { label: "Current balance", value: data.currentBalance ? `$${Number(data.currentBalance).toLocaleString()}` : "—" },
     { label: "Monthly income", value: data.monthlyIncome ? `$${Number(data.monthlyIncome).toLocaleString()}` : "—" },
@@ -501,9 +522,9 @@ function Step4({ data }: { data: OnboardingData }) {
           All set
         </span>
       </div>
-      <h2 className="text-2xl font-semibold text-white mb-2">Here's what we've got</h2>
+      <h2 className="text-2xl font-semibold text-white mb-2">Here&apos;s what we&apos;ve got</h2>
       <p className="text-sm text-neutral-500 mb-8">
-        Review your details. You can update everything later in settings.
+        Check your details before you continue.
       </p>
 
       <div
@@ -513,7 +534,7 @@ function Step4({ data }: { data: OnboardingData }) {
         {rows.map((row, i) => (
           <div
             key={row.label}
-            className="flex items-center justify-between px-5 py-4"
+            className="flex items-center justify-between gap-4 px-5 py-4"
             style={{
               background: i % 2 === 0 ? "#0a0a0a" : "#0c0c0c",
               borderBottom: i < rows.length - 1 ? "1px solid #141414" : "none",
@@ -535,9 +556,9 @@ function Step4({ data }: { data: OnboardingData }) {
             border: "1px solid #1a3326",
           }}
         >
-          <span style={{ color: "#22c55e", fontSize: 14 }}>✓</span>
+          <CheckIcon aria-hidden className="w-4 h-4 shrink-0 mt-0.5" style={{ color: "#22c55e" }} />
           <p className="text-[13px]" style={{ color: "#2d7a4f" }}>
-            Your bills are prioritized. We'll tell you which ones to pay first based on your balance.
+            Your bills are prioritized. We&apos;ll tell you which ones to pay first based on your balance.
           </p>
         </div>
       )}
@@ -551,6 +572,9 @@ export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [data, setData] = useState<OnboardingData>({
+    name: "",
+    school: "",
+    city: "",
     studentType: null,
     currentBalance: "",
     monthlyIncome: "",
@@ -575,6 +599,9 @@ export default function OnboardingPage() {
     if (step === 1) return data.studentType !== null;
     if (step === 2)
       return (
+        data.name.trim() !== "" &&
+        data.school.trim() !== "" &&
+        data.city.trim() !== "" &&
         data.currentBalance !== "" &&
         data.monthlyIncome !== "" &&
         data.nextPayDate !== ""
@@ -582,23 +609,48 @@ export default function OnboardingPage() {
     return true;
   }
 
-  function handleNext() {
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const profileId = useRef<string | null>(null);
+
+  async function handleNext() {
     if (step < TOTAL_STEPS) {
       setStep((s) => s + 1);
-    } else {
-      // Save to localStorage and redirect
-      localStorage.setItem(
-        "uniwallet-profile",
-        JSON.stringify({
-          studentType: data.studentType,
+      return;
+    }
+    setSaving(true);
+    setSaveError("");
+    try {
+      // On a retry, reuse the profile and skip bills that already saved, so nothing is duplicated.
+      if (!profileId.current) {
+        const profile = await api.profile.create({
+          name: data.name.trim(),
+          school: data.school.trim(),
+          city: data.city.trim(),
+          studentType: data.studentType!,
           currentBalance: Number(data.currentBalance),
           monthlyIncome: Number(data.monthlyIncome),
           payFrequency: data.payFrequency,
           nextPayDate: data.nextPayDate,
-          bills: data.bills,
-        })
-      );
+        });
+        profileId.current = profile.id;
+      }
+      for (const bill of data.bills) {
+        await api.bills.create({
+          userId: profileId.current,
+          name: bill.name,
+          amount: bill.amount,
+          dueDate: bill.dueDate,
+          category: "other",
+          priority: bill.priority,
+        });
+        setData((d) => ({ ...d, bills: d.bills.filter((b) => b.id !== bill.id) }));
+      }
+      setUserId(profileId.current);
       router.push("/dashboard");
+    } catch {
+      setSaveError("Couldn't save your details. Check that the UniWallet server is running, then try again.");
+      setSaving(false);
     }
   }
 
@@ -608,12 +660,12 @@ export default function OnboardingPage() {
 
   return (
     <div
-      className="flex h-screen overflow-hidden font-sans"
+      className="flex h-dvh overflow-hidden font-sans"
       style={{ background: "#080808", color: "#f5f5f5" }}
     >
       {/* ── Left panel ── */}
       <div
-        className="flex flex-col w-72 shrink-0 px-8 py-10"
+        className="hidden md:flex flex-col w-72 shrink-0 px-8 py-10"
         style={{ background: "#0c0c0c", borderRight: "1px solid #141414" }}
       >
         {/* Brand */}
@@ -651,7 +703,7 @@ export default function OnboardingPage() {
                       : "1px solid #1c1c1c",
                   }}
                 >
-                  {done ? "✓" : n}
+                  {done ? <CheckIcon aria-hidden className="w-3 h-3" /> : n}
                 </div>
                 <span
                   className="text-[13px] font-medium"
@@ -666,7 +718,7 @@ export default function OnboardingPage() {
 
         {/* Bottom note */}
         <p className="text-[11px] leading-relaxed" style={{ color: "#2a2a2a" }}>
-          Your data stays on your device. Nothing is shared without your permission.
+          Your details are saved to UniWallet so the coach can use your real numbers.
         </p>
       </div>
 
@@ -688,10 +740,10 @@ export default function OnboardingPage() {
 
         {/* Header */}
         <div
-          className="flex items-center justify-between px-12 py-5 shrink-0"
+          className="flex items-center justify-between px-4 md:px-12 py-5 shrink-0"
           style={{ borderBottom: "1px solid #111" }}
         >
-          <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-2">
             {stepLabels.map((label, i) => {
               const n = i + 1;
               const done = n < step;
@@ -701,13 +753,13 @@ export default function OnboardingPage() {
                   {i > 0 && (
                     <div
                       className="w-6 h-px"
-                      style={{ background: done ? "#1a3326" : "#161616" }}
+                      style={{ background: done ? "#1e3a8a" : "#161616" }}
                     />
                   )}
                   <span
                     className="text-[12px] font-medium"
                     style={{
-                      color: active ? "#f0f0f0" : done ? "#2d5e42" : "#2a2a2a",
+                      color: active ? "#f0f0f0" : done ? "#3b5b9a" : "#555",
                     }}
                   >
                     {label}
@@ -716,14 +768,14 @@ export default function OnboardingPage() {
               );
             })}
           </div>
-          <span className="text-[11px] tabular-nums" style={{ color: "#333" }}>
+          <span className="text-[11px] tabular-nums ml-auto" style={{ color: "#555" }}>
             Step {step} of {TOTAL_STEPS}
           </span>
         </div>
 
         {/* Step content */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto px-12 py-12">
+          <div className="max-w-2xl mx-auto px-4 md:px-12 py-8 md:py-12">
             {step === 1 && (
               <Step1
                 data={data}
@@ -740,9 +792,12 @@ export default function OnboardingPage() {
 
         {/* Footer nav */}
         <div
-          className="flex items-center justify-between px-12 py-5 shrink-0"
+          className="flex flex-wrap items-center justify-between gap-3 px-4 md:px-12 py-5 shrink-0"
           style={{ borderTop: "1px solid #111" }}
         >
+          {saveError && (
+            <p role="alert" className="basis-full text-[12px]" style={{ color: "#ef4444" }}>{saveError}</p>
+          )}
           <button
             onClick={() => setStep((s) => s - 1)}
             disabled={step === 1}
@@ -768,22 +823,23 @@ export default function OnboardingPage() {
 
           <button
             onClick={handleNext}
-            disabled={!canProceed()}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-lg text-[13px] font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            disabled={!canProceed() || saving}
+            className="flex items-center gap-2 px-6 py-2.5 rounded-lg text-[13px] font-semibold transition-all disabled:cursor-not-allowed"
             style={{
               background: canProceed()
                 ? step === TOTAL_STEPS
                   ? "linear-gradient(135deg, #1d4ed8, #3b82f6)"
                   : "#fff"
-                : "#1e1e1e",
+                : "#161616",
               color: canProceed()
                 ? step === TOTAL_STEPS
                   ? "#fff"
                   : "#080808"
-                : "#444",
+                : "#777",
+              border: canProceed() ? "1px solid transparent" : "1px solid #2a2a2a",
             }}
           >
-            {step === TOTAL_STEPS ? "See My Dashboard →" : "Continue →"}
+            {saving ? "Saving..." : step === TOTAL_STEPS ? "See My Dashboard →" : "Continue →"}
           </button>
         </div>
       </div>

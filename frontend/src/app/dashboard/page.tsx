@@ -3,8 +3,10 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import { Sidebar } from "@/components/Sidebar";
+import { Loading } from "@/components/Loading";
 import { useProfile } from "@/hooks/useProfile";
 import { computeForecast } from "@/lib/forecast";
+import { ExclamationTriangleIcon, ExclamationCircleIcon, LightBulbIcon } from "@heroicons/react/24/outline";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -16,7 +18,7 @@ const STATUS_CFG = {
     badge: "Safe",
   },
   warning: {
-    label: "Heads up — it's tight",
+    label: "Heads up, it's tight",
     accent: "#eab308",
     glow: "rgba(234,179,8,0.12)",
     badge: "Warning",
@@ -36,43 +38,36 @@ const PRIORITY_CFG = {
 };
 
 const INSIGHT_CFG = {
-  danger: { border: "#ef4444", bg: "rgba(239,68,68,0.07)", icon: "⚠", color: "#ef4444" },
-  warning: { border: "#eab308", bg: "rgba(234,179,8,0.07)", icon: "◈", color: "#eab308" },
-  tip: { border: "#3b82f6", bg: "rgba(59,130,246,0.07)", icon: "→", color: "#3b82f6" },
+  danger: { border: "#ef4444", bg: "rgba(239,68,68,0.07)", Icon: ExclamationTriangleIcon, color: "#ef4444" },
+  warning: { border: "#eab308", bg: "rgba(234,179,8,0.07)", Icon: ExclamationCircleIcon, color: "#eab308" },
+  tip: { border: "#3b82f6", bg: "rgba(59,130,246,0.07)", Icon: LightBulbIcon, color: "#3b82f6" },
 };
 
 // ─── Loading screen ───────────────────────────────────────────────────────────
 
-function Loading() {
-  return (
-    <div className="flex h-screen items-center justify-center" style={{ background: "#0a0a0a" }}>
-      <div className="w-1.5 h-1.5 rounded-full animate-ping" style={{ background: "#333" }} />
-    </div>
-  );
-}
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
-  const { profile, ready } = useProfile();
+  const { profile, ready, error } = useProfile();
 
   const forecast = useMemo(
     () => (profile ? computeForecast(profile) : null),
     [profile]
   );
 
-  if (!ready || !forecast || !profile) return <Loading />;
+  if (!ready || !forecast || !profile) return <Loading error={error} />;
 
   const s = STATUS_CFG[forecast.status];
 
   return (
-    <div className="flex h-screen overflow-hidden font-sans" style={{ background: "#0a0a0a", color: "#f0f0f0" }}>
-      <Sidebar />
+    <div className="flex flex-col md:flex-row h-dvh overflow-hidden font-sans" style={{ background: "#0a0a0a", color: "#f0f0f0" }}>
+      <Sidebar balance={profile?.currentBalance} />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         {/* Top bar */}
         <div
-          className="flex items-center justify-between px-8 py-4 shrink-0"
+          className="flex items-center justify-between gap-4 px-4 md:px-8 py-4 shrink-0"
           style={{ borderBottom: "1px solid #1a1a1a" }}
         >
           <div>
@@ -88,18 +83,18 @@ export default function DashboardPage() {
         </div>
 
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto px-8 py-6 space-y-5">
+        <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 space-y-5">
 
           {/* ── Status Banner ── */}
           <div
-            className="rounded-2xl px-8 py-7"
+            className="rounded-2xl px-5 md:px-8 py-6 md:py-7"
             style={{
               background: `linear-gradient(135deg, ${s.glow} 0%, rgba(255,255,255,0.01) 100%)`,
               border: `1px solid ${s.accent}22`,
               boxShadow: `0 0 60px ${s.glow}`,
             }}
           >
-            <div className="flex items-start justify-between gap-6">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
               {/* Left: status headline */}
               <div>
                 <div className="flex items-center gap-3 mb-3">
@@ -114,7 +109,7 @@ export default function DashboardPage() {
                     {s.badge}
                   </span>
                 </div>
-                <p className="text-3xl font-bold tracking-tight mb-2" style={{ color: s.accent }}>
+                <p className="text-2xl md:text-3xl font-bold tracking-tight mb-2" style={{ color: s.accent }}>
                   {s.label}
                 </p>
                 <div className="mt-4">
@@ -130,8 +125,8 @@ export default function DashboardPage() {
 
               {/* Right: key stats */}
               <div
-                className="flex gap-8 shrink-0 pl-8 py-1"
-                style={{ borderLeft: "1px solid rgba(255,255,255,0.06)" }}
+                className="flex flex-wrap gap-x-8 gap-y-4 shrink-0 pt-5 md:pt-1 md:pl-8 border-t md:border-t-0 md:border-l"
+                style={{ borderColor: "rgba(255,255,255,0.06)" }}
               >
                 <div>
                   <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "#555" }}>
@@ -174,7 +169,7 @@ export default function DashboardPage() {
           </div>
 
           {/* ── 3-column grid ── */}
-          <div className="grid gap-4" style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
             {/* Bills priority */}
             <div className="rounded-2xl overflow-hidden" style={{ background: "#111", border: "1px solid #222" }}>
@@ -251,13 +246,13 @@ export default function DashboardPage() {
                         className="rounded-xl px-4 py-3 flex items-start gap-3"
                         style={{ background: ic.bg, border: `1px solid ${ic.border}20`, borderLeft: `3px solid ${ic.border}` }}
                       >
-                        <span className="text-sm shrink-0 mt-0.5 font-bold" style={{ color: ic.color }}>{ic.icon}</span>
+                        <ic.Icon aria-hidden className="w-4 h-4 shrink-0 mt-0.5" style={{ color: ic.color }} />
                         <p className="text-[13px] leading-snug" style={{ color: "#ccc" }}>{insight.message}</p>
                       </div>
                     );
                   })
                 ) : (
-                  <p className="text-[13px] text-center py-4" style={{ color: "#444" }}>No alerts — looking good.</p>
+                  <p className="text-[13px] text-center py-4" style={{ color: "#444" }}>No alerts. Looking good.</p>
                 )}
               </div>
             </div>

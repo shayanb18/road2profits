@@ -1,8 +1,7 @@
 /**
  * UniWallet Frontend API Client
  * ─────────────────────────────
- * Drop this file into your frontend project (src/lib/api.ts).
- * Set NEXT_PUBLIC_API_URL (or VITE_API_URL) in your frontend .env.
+ * Set NEXT_PUBLIC_API_URL in frontend/.env.local (defaults to http://localhost:3001).
  *
  * Usage:
  *   import { api } from "@/lib/api"
@@ -12,10 +11,7 @@
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const BASE_URL =
-  (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_API_URL) ||
-  (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_API_URL) ||
-  "http://localhost:3001";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 // ─── Types (mirror of backend src/types/index.ts) ────────────────────────────
 
@@ -300,6 +296,7 @@ export const api = {
       category: BillCategory;
       priority: Priority;
       recurring: boolean;
+      isPaid: boolean;
     }>) => put<Bill>(`/api/bills/${billId}`, body),
 
     delete: (billId: string) =>

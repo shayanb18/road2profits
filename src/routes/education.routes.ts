@@ -155,7 +155,7 @@ router.post("/:userId/complete/:moduleId", async (req: Request, res: Response) =
     return ok(res, {
       alreadyCompleted: false,
       xpEarned: module.xpReward,
-      message: `🎉 Nice work! You earned ${module.xpReward} XP for completing "${module.title}"`,
+      message: `Nice work! You earned ${module.xpReward} XP for completing "${module.title}"`,
       progress: {
         moduleId: progress.moduleId,
         title: progress.title,

@@ -4,7 +4,7 @@ import app from "./app";
 const PORT = parseInt(process.env.PORT ?? "3001", 10);
 
 app.listen(PORT, () => {
-  console.log(`\n🚀 UniWallet API running on http://localhost:${PORT}`);
-  console.log(`📋 Health: http://localhost:${PORT}/health`);
-  console.log(`📊 Dashboard: http://localhost:${PORT}/api/dashboard/:userId\n`);
+  console.log(`\nUniWallet API running on http://localhost:${PORT}`);
+  console.log(`Health: http://localhost:${PORT}/health`);
+  console.log(`Dashboard: http://localhost:${PORT}/api/dashboard/:userId\n`);
 });

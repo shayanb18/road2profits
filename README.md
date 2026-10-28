@@ -9,11 +9,10 @@ A student enters their balance, income, pay schedule and bills. UniWallet foreca
 | Folder | What it is | Stack |
 |:--|:--|:--|
 | `/` (root) | Backend REST API | Express, TypeScript, Prisma, Supabase Postgres, OpenAI `gpt-4o-mini`, zod |
-| `frontend/` | Web app: onboarding, dashboard, bills, coach, challenge, insights | Next.js 16, React 19, Tailwind |
-| `frontend-client/` | Typed API client (`api.ts`) and React hooks (`hooks.ts`) for calling the backend; see `frontend-client/USAGE.md` | TypeScript |
+| `frontend/` | Web app: onboarding, dashboard, bills, coach, challenge, insights | Next.js 16, React 19, Tailwind, Heroicons |
 | `tests.http` | Example requests for every endpoint (VS Code REST Client) | |
 
-**Current state:** the frontend runs on its own. It stores the profile, bills and challenge in `localStorage` and computes the forecast and coach replies in the browser (`frontend/src/lib/forecast.ts`). It doesn't call the backend yet. `frontend-client/` is the planned bridge between the two.
+**How they connect:** onboarding creates the profile and bills through the API, and the app loads them back from it, so marking a bill paid is saved in Postgres. The coach sends questions to the backend's GPT-4o-mini endpoint; if that fails (for example, no `OPENAI_API_KEY`), it answers with built-in rules and shows "Basic replies". The browser keeps only the user ID and the current challenge in `localStorage`. The dashboard forecast is still computed in the browser (`frontend/src/lib/forecast.ts`) from the data the API returns.
 
 ---
 
@@ -21,14 +20,14 @@ A student enters their balance, income, pay schedule and bills. UniWallet foreca
 
 ### Frontend
 
+Start the backend first (below). The frontend calls it at `http://localhost:3001` unless `NEXT_PUBLIC_API_URL` is set in `frontend/.env.local`.
+
 ```bash
 cd frontend
 npm install
 npm run dev
 # → http://localhost:3000
 ```
-
-No environment variables or backend needed.
 
 ### Backend
 
@@ -590,14 +589,14 @@ Returns single module.
 
 ```
 road2profits/
-├── frontend/                  # Next.js web app (runs on its own, see "Current state")
+├── frontend/                  # Next.js web app (calls the backend, see "How they connect")
 │   └── src/
 │       ├── app/               # Pages: onboarding, dashboard, bills, coach, challenge, insights
-│       ├── components/        # Sidebar
-│       ├── hooks/useProfile.ts
+│       ├── components/        # Sidebar (bottom tab bar on phones), Loading
+│       ├── hooks/useProfile.ts # Loads profile + bills from the API
+│       ├── lib/api.ts         # Typed API client
 │       ├── lib/forecast.ts    # Client-side budget forecast
 │       └── types/index.ts
-├── frontend-client/           # api.ts + hooks.ts for calling the backend, USAGE.md
 ├── prisma/
 │   └── schema.prisma          # DB schema (Profile, Bill, Challenge, SavingsGoal, EducationProgress, ChatMessage)
 ├── src/
@@ -641,8 +640,9 @@ road2profits/
 
 ## Known issues
 
-- The frontend doesn't call the backend yet (see "Current state" above).
 - The rate limiter keeps its counts in memory, so they reset on restart and aren't shared between instances.
+- Dates entered as `YYYY-MM-DD` are stored as UTC midnight, so they can display one day early in time zones west of UTC (for example, a Nov 5 payday shows as Nov 4 in Ontario).
+- The challenge page keeps its challenge in `localStorage`; it doesn't use the backend's `/api/challenge` yet.
 
 ---
 
