@@ -497,7 +497,7 @@ function Step4({ data }: { data: OnboardingData }) {
   return (
     <div>
       <div className="mb-2">
-        <span className="text-[11px] uppercase tracking-[0.2em] font-medium" style={{ color: "#22c55e" }}>
+        <span className="text-[11px] uppercase tracking-[0.2em] font-medium" style={{ color: "#3b82f6" }}>
           All set
         </span>
       </div>
@@ -619,7 +619,7 @@ export default function OnboardingPage() {
         {/* Brand */}
         <div className="mb-12">
           <p className="text-[11px] uppercase tracking-[0.22em] font-semibold mb-0.5"
-            style={{ color: "#22c55e" }}>
+            style={{ color: "#3b82f6" }}>
             UniWallet
           </p>
           <p className="text-[13px] text-neutral-600">Setup</p>
@@ -642,7 +642,7 @@ export default function OnboardingPage() {
                 <div
                   className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[10px] font-semibold"
                   style={{
-                    background: done ? "#15803d" : active ? "#1e1e1e" : "#111",
+                    background: done ? "#1d4ed8" : active ? "#1e1e1e" : "#111",
                     color: done ? "#fff" : active ? "#fff" : "#333",
                     border: done
                       ? "none"
@@ -655,7 +655,7 @@ export default function OnboardingPage() {
                 </div>
                 <span
                   className="text-[13px] font-medium"
-                  style={{ color: done ? "#4ade80" : active ? "#fff" : "#333" }}
+                  style={{ color: done ? "#60a5fa" : active ? "#fff" : "#333" }}
                 >
                   {label}
                 </span>
@@ -681,7 +681,7 @@ export default function OnboardingPage() {
             className="absolute inset-y-0 left-0 transition-all duration-500 ease-out"
             style={{
               width: `${progress}%`,
-              background: "linear-gradient(90deg, #15803d, #4ade80)",
+              background: "linear-gradient(90deg, #1d4ed8, #60a5fa)",
             }}
           />
         </div>
@@ -773,7 +773,7 @@ export default function OnboardingPage() {
             style={{
               background: canProceed()
                 ? step === TOTAL_STEPS
-                  ? "linear-gradient(135deg, #15803d, #22c55e)"
+                  ? "linear-gradient(135deg, #1d4ed8, #3b82f6)"
                   : "#fff"
                 : "#1e1e1e",
               color: canProceed()
