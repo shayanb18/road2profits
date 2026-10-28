@@ -59,7 +59,6 @@ function priorityScore(p: Priority): number {
 
 export function computeForecast(
   currentBalance: number,
-  monthlyIncome: number,
   nextPayDate: Date,
   bills: Bill[]
 ): BudgetInsight {

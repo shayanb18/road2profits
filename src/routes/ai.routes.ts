@@ -30,7 +30,6 @@ router.post(
     const bills = await prisma.bill.findMany({ where: { userId } });
     const insight = computeForecast(
       profile.currentBalance,
-      profile.monthlyIncome,
       profile.nextPayDate,
       bills
     );
