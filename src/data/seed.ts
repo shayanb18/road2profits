@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Seeding UniWallet database...");
+  console.log("Seeding UniWallet database...");
 
   // ─── Seed Profile ─────────────────────────────────────────────────────────
   const profile = await prisma.profile.upsert({
@@ -22,7 +22,7 @@ async function main() {
       city: "Waterloo",
     },
   });
-  console.log(`✅ Profile: ${profile.name} (id: ${profile.id})`);
+  console.log(`Profile: ${profile.name} (id: ${profile.id})`);
 
   // ─── Seed Bills ───────────────────────────────────────────────────────────
   await prisma.bill.deleteMany({ where: { userId: profile.id } });
@@ -91,7 +91,7 @@ async function main() {
       },
     ],
   });
-  console.log(`✅ Bills: ${bills.count} created`);
+  console.log(`Bills: ${bills.count} created`);
 
   // ─── Seed Savings Goals ───────────────────────────────────────────────────
   await prisma.savingsGoal.deleteMany({ where: { userId: profile.id } });
@@ -149,7 +149,7 @@ async function main() {
     },
   });
 
-  console.log(`✅ Savings goals: 3 created`);
+  console.log(`Savings goals: 3 created`);
 
   // ─── Seed Education Progress ───────────────────────────────────────────────
   await prisma.educationProgress.deleteMany({ where: { userId: profile.id } });
@@ -176,7 +176,7 @@ async function main() {
       },
     ],
   });
-  console.log(`✅ Education progress: 2 completed modules`);
+  console.log(`Education progress: 2 completed modules`);
 
   // ─── Seed Challenge ────────────────────────────────────────────────────────
   await prisma.challenge.deleteMany({ where: { userId: profile.id } });
@@ -193,20 +193,20 @@ async function main() {
       progress: 12,
       target: 30,
       streak: 2,
-      rewardLabel: "🍳 Home Chef Badge",
+      rewardLabel: "Home Chef Badge",
       status: "active",
       weekStart,
     },
   });
-  console.log(`✅ Challenge: seeded`);
+  console.log(`Challenge: seeded`);
 
-  console.log(`\n🎉 Seed complete! Test user ID: ${profile.id}`);
-  console.log(`👉 Try: GET http://localhost:3001/api/dashboard/${profile.id}\n`);
+  console.log(`\nSeed complete! Test user ID: ${profile.id}`);
+  console.log(`Try: GET http://localhost:3001/api/dashboard/${profile.id}\n`);
 }
 
 main()
   .catch((e) => {
-    console.error("❌ Seed failed:", e);
+    console.error("Seed failed:", e);
     process.exit(1);
   })
   .finally(() => prisma.$disconnect());

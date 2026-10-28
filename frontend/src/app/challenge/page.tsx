@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
+import { Loading } from "@/components/Loading";
 import { useProfile } from "@/hooks/useProfile";
 import { Challenge } from "@/types";
+import { CheckBadgeIcon, FlagIcon, FireIcon } from "@heroicons/react/24/outline";
 
 // ─── Presets ──────────────────────────────────────────────────────────────────
 
@@ -26,7 +28,7 @@ const PRESETS: Omit<Challenge, "id" | "current" | "deadline">[] = [
 ];
 
 function getMotivation(pct: number): string {
-  if (pct === 0) return "Day 1. Start strong — the hardest part is getting going.";
+  if (pct === 0) return "Day 1. Start strong. The hardest part is getting going.";
   if (pct < 0.3) return "Good start. Don't let up now.";
   if (pct < 0.5) return "You're building momentum. Keep going.";
   if (pct < 0.75) return "More than halfway there. You've got this.";
@@ -36,28 +38,21 @@ function getMotivation(pct: number): string {
 
 const CHALLENGE_KEY = "uniwallet-challenge";
 
-function Loading() {
-  return (
-    <div className="flex h-screen items-center justify-center" style={{ background: "#0a0a0a" }}>
-      <div className="w-1.5 h-1.5 rounded-full animate-ping" style={{ background: "#333" }} />
-    </div>
-  );
-}
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ChallengePage() {
-  const { ready } = useProfile();
-  const [challenge, setChallenge] = useState<Challenge | null>(null);
-  const [challengeReady, setChallengeReady] = useState(false);
-
-  useEffect(() => {
+  const { profile, ready, error } = useProfile();
+  // Safe to read in the initializer: the page shows <Loading /> until the profile loads, so server and client render the same.
+  const [challenge, setChallenge] = useState<Challenge | null>(() => {
+    if (typeof window === "undefined") return null;
     try {
       const raw = localStorage.getItem(CHALLENGE_KEY);
-      if (raw) setChallenge(JSON.parse(raw) as Challenge);
-    } catch {}
-    setChallengeReady(true);
-  }, []);
+      return raw ? (JSON.parse(raw) as Challenge) : null;
+    } catch {
+      return null;
+    }
+  });
 
   function saveChallenge(c: Challenge) {
     localStorage.setItem(CHALLENGE_KEY, JSON.stringify(c));
@@ -68,7 +63,7 @@ export default function ChallengePage() {
     const now = new Date();
     const deadline = new Date(now.getTime() + preset.target * 24 * 60 * 60 * 1000);
     saveChallenge({
-      id: String(Date.now()),
+      id: String(now.getTime()),
       ...preset,
       current: 0,
       deadline: deadline.toISOString().split("T")[0],
@@ -86,7 +81,7 @@ export default function ChallengePage() {
     setChallenge(null);
   }
 
-  if (!ready || !challengeReady) return <Loading />;
+  if (!ready) return <Loading error={error} />;
 
   const pct = challenge ? challenge.current / challenge.target : 0;
   const daysLeft = challenge
@@ -95,29 +90,29 @@ export default function ChallengePage() {
   const complete = challenge ? challenge.current >= challenge.target : false;
 
   return (
-    <div className="flex h-screen overflow-hidden font-sans" style={{ background: "#0a0a0a", color: "#f0f0f0" }}>
-      <Sidebar />
+    <div className="flex flex-col md:flex-row h-dvh overflow-hidden font-sans" style={{ background: "#0a0a0a", color: "#f0f0f0" }}>
+      <Sidebar balance={profile?.currentBalance} />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         {/* Top bar */}
         <div
-          className="flex items-center justify-between px-8 py-4 shrink-0"
+          className="flex items-center justify-between gap-4 px-4 md:px-8 py-4 shrink-0"
           style={{ borderBottom: "1px solid #1a1a1a" }}
         >
           <div>
             <h1 className="text-[15px] font-semibold text-white leading-none mb-0.5">Your Challenge</h1>
             <p className="text-[12px]" style={{ color: "#555" }}>
-              {challenge ? "Active challenge" : "No active challenge — pick one"}
+              {challenge ? "Active challenge" : "No active challenge. Pick one."}
             </p>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-8 py-6">
+        <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6">
           {challenge ? (
             <div className="max-w-xl space-y-4">
               {/* Active challenge card */}
               <div
-                className="rounded-2xl px-7 py-6"
+                className="rounded-2xl px-5 md:px-7 py-6"
                 style={{
                   background: complete
                     ? "rgba(34,197,94,0.06)"
@@ -134,13 +129,17 @@ export default function ChallengePage() {
                       className="text-[11px] uppercase tracking-widest font-medium mb-2"
                       style={{ color: complete ? "#22c55e" : "#3b82f6" }}
                     >
-                      {complete ? "Complete ✓" : "In Progress"}
+                      {complete ? "Complete" : "In Progress"}
                     </p>
                     <h2 className="text-xl font-bold text-white leading-snug">
                       {challenge.title}
                     </h2>
                   </div>
-                  <span className="text-3xl shrink-0">{complete ? "🎉" : "🎯"}</span>
+                  {complete ? (
+                    <CheckBadgeIcon aria-hidden className="w-8 h-8 shrink-0" style={{ color: "#22c55e" }} />
+                  ) : (
+                    <FlagIcon aria-hidden className="w-8 h-8 shrink-0" style={{ color: "#3b82f6" }} />
+                  )}
                 </div>
 
                 <p className="text-[13px] leading-relaxed mb-6" style={{ color: "#888" }}>
@@ -188,7 +187,7 @@ export default function ChallengePage() {
                   />
                   <div>
                     <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "#444" }}>
-                      Streak 🔥
+                      Streak
                     </p>
                     <p className="text-2xl font-bold text-white tabular-nums">
                       {challenge.current}
@@ -226,7 +225,7 @@ export default function ChallengePage() {
                       onMouseEnter={(e) => (e.currentTarget.style.background = "#2563eb")}
                       onMouseLeave={(e) => (e.currentTarget.style.background = "#3b82f6")}
                     >
-                      ✓ Complete today
+                      Complete today
                     </button>
                   )}
                   <button
@@ -257,7 +256,7 @@ export default function ChallengePage() {
                   className="rounded-2xl px-5 py-4 flex items-center gap-4"
                   style={{ background: "#111", border: "1px solid #222" }}
                 >
-                  <span className="text-2xl">🔥</span>
+                  <FireIcon aria-hidden className="w-7 h-7 shrink-0" style={{ color: "#f97316" }} />
                   <div>
                     <p className="text-[14px] font-semibold text-white">
                       {challenge.current} day streak
@@ -266,7 +265,7 @@ export default function ChallengePage() {
                       {challenge.current === 1
                         ? "One day down. Keep it going."
                         : challenge.current < 3
-                        ? "Building momentum — don't break the chain."
+                        ? "Building momentum. Don't break the chain."
                         : "Solid streak. This is becoming a habit."}
                     </p>
                   </div>

@@ -2,11 +2,14 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Sidebar } from "@/components/Sidebar";
+import { Loading } from "@/components/Loading";
 import { useProfile } from "@/hooks/useProfile";
 import { computeForecast } from "@/lib/forecast";
 import { FinancialProfile, ForecastResult } from "@/types";
+import { api, getUserId } from "@/lib/api";
+import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
 
-// ─── Rule-based response engine ───────────────────────────────────────────────
+// ─── Rule-based fallback, used when the AI coach endpoint is unavailable ──────
 
 function getCoachResponse(
   message: string,
@@ -91,58 +94,53 @@ interface Message {
 
 const SUGGESTED_PROMPTS = ["Why am I broke?", "What should I cut?", "Can I afford anything?", "When's my payday?"];
 
-function Loading() {
+function CoachAvatar() {
   return (
-    <div className="flex h-screen items-center justify-center" style={{ background: "#0a0a0a" }}>
-      <div className="w-1.5 h-1.5 rounded-full animate-ping" style={{ background: "#333" }} />
+    <div
+      className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mr-3 mt-0.5"
+      style={{ background: "#1a1a1a", color: "#3b82f6", border: "1px solid #2a2a2a" }}
+    >
+      <ChatBubbleLeftRightIcon aria-hidden className="w-3.5 h-3.5" />
     </div>
   );
 }
 
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function CoachPage() {
-  const { profile, ready } = useProfile();
+  const { profile, ready, error } = useProfile();
   const forecast = useMemo(() => (profile ? computeForecast(profile) : null), [profile]);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
+  const [aiDown, setAiDown] = useState(false);
+  const nextId = useRef(0);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Greeting on mount
-  useEffect(() => {
-    if (!profile || !forecast) return;
-    const statusLine = {
-      safe: "Your finances look solid right now — you're on track.",
-      warning: "Heads up: your balance will be tight before payday.",
-      over_budget: "Your numbers aren't looking great before payday. Let's figure it out.",
-    }[forecast.status];
-    setMessages([
-      {
-        id: "greeting",
-        role: "coach",
-        text: `Hey. I'm your money coach — no fluff, just straight talk. ${statusLine} Ask me anything.`,
-      },
-    ]);
-  }, [profile, forecast]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typing]);
 
-  function send(text: string) {
-    if (!text.trim() || !profile || !forecast) return;
-    const userMsg: Message = { id: String(Date.now()), role: "user", text: text.trim() };
-    setMessages((m) => [...m, userMsg]);
+  async function send(text: string) {
+    const userId = getUserId();
+    if (!text.trim() || !profile || !forecast || !userId || typing) return;
+    setMessages((m) => [...m, { id: String(nextId.current++), role: "user", text: text.trim() }]);
     setInput("");
     setTyping(true);
-    setTimeout(() => {
-      const response = getCoachResponse(text, profile, forecast);
-      setMessages((m) => [...m, { id: String(Date.now() + 1), role: "coach", text: response }]);
-      setTyping(false);
-    }, 600 + Math.random() * 400);
+    let reply: string;
+    try {
+      reply = (await api.ai.chat(userId, text.trim())).message.content;
+      setAiDown(false);
+    } catch {
+      reply = getCoachResponse(text, profile, forecast);
+      setAiDown(true);
+    }
+    setMessages((m) => [...m, { id: String(nextId.current++), role: "coach", text: reply }]);
+    setTyping(false);
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -150,16 +148,27 @@ export default function CoachPage() {
     send(input);
   }
 
-  if (!ready || !forecast || !profile) return <Loading />;
+  if (!ready || !forecast || !profile) return <Loading error={error} />;
+
+  const statusLine = {
+    safe: "Your finances look solid right now. You're on track.",
+    warning: "Heads up: your balance will be tight before payday.",
+    over_budget: "Your numbers aren't looking great before payday. Let's figure it out.",
+  }[forecast.status];
+  const greeting: Message = {
+    id: "greeting",
+    role: "coach",
+    text: `Hey. I'm your money coach. No fluff, just straight talk. ${statusLine} Ask me anything.`,
+  };
 
   return (
-    <div className="flex h-screen overflow-hidden font-sans" style={{ background: "#0a0a0a", color: "#f0f0f0" }}>
-      <Sidebar />
+    <div className="flex flex-col md:flex-row h-dvh overflow-hidden font-sans" style={{ background: "#0a0a0a", color: "#f0f0f0" }}>
+      <Sidebar balance={profile?.currentBalance} />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         {/* Top bar */}
         <div
-          className="flex items-center justify-between px-8 py-4 shrink-0"
+          className="flex items-center justify-between gap-4 px-4 md:px-8 py-4 shrink-0"
           style={{ borderBottom: "1px solid #1a1a1a" }}
         >
           <div>
@@ -168,16 +177,17 @@ export default function CoachPage() {
           </div>
           <div
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
-            style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.15)" }}
+            style={aiDown ? { background: "#141414", border: "1px solid #222" } : { background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.15)" }}
+            title={aiDown ? "The AI coach is unavailable, so replies come from built-in rules." : undefined}
           >
-            <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#22c55e" }} />
-            <span className="text-[11px] font-medium" style={{ color: "#22c55e" }}>Online</span>
+            <div className={`w-1.5 h-1.5 rounded-full ${aiDown ? "" : "animate-pulse"}`} style={{ background: aiDown ? "#555" : "#22c55e" }} />
+            <span className="text-[11px] font-medium shrink-0" style={{ color: aiDown ? "#888" : "#22c55e" }}>{aiDown ? "Basic replies" : "Online"}</span>
           </div>
         </div>
 
         {/* Suggested prompts */}
         <div
-          className="flex items-center gap-2.5 px-8 py-3 shrink-0 overflow-x-auto"
+          className="flex items-center gap-2.5 px-4 md:px-8 py-3 shrink-0 overflow-x-auto"
           style={{ borderBottom: "1px solid #141414" }}
         >
           <span className="text-[11px] shrink-0" style={{ color: "#444" }}>Try:</span>
@@ -206,19 +216,14 @@ export default function CoachPage() {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-8 py-6 space-y-4">
-          {messages.map((msg) => (
+        <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 space-y-4">
+          {[greeting, ...messages].map((msg) => (
             <div
               key={msg.id}
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
               {msg.role === "coach" && (
-                <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 mr-3 mt-0.5"
-                  style={{ background: "#1a1a1a", color: "#3b82f6", border: "1px solid #2a2a2a" }}
-                >
-                  ✦
-                </div>
+                <CoachAvatar />
               )}
               <div
                 className="max-w-lg rounded-2xl px-4 py-3"
@@ -236,12 +241,7 @@ export default function CoachPage() {
           {/* Typing indicator */}
           {typing && (
             <div className="flex justify-start">
-              <div
-                className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 mr-3 mt-0.5"
-                style={{ background: "#1a1a1a", color: "#3b82f6", border: "1px solid #2a2a2a" }}
-              >
-                ✦
-              </div>
+              <CoachAvatar />
               <div
                 className="rounded-2xl px-4 py-3 flex items-center gap-1"
                 style={{ background: "#141414", border: "1px solid #222", borderBottomLeftRadius: 4 }}
@@ -261,7 +261,7 @@ export default function CoachPage() {
         </div>
 
         {/* Input */}
-        <div className="shrink-0 px-8 py-4" style={{ borderTop: "1px solid #1a1a1a" }}>
+        <div className="shrink-0 px-4 md:px-8 py-4" style={{ borderTop: "1px solid #1a1a1a" }}>
           <form onSubmit={handleSubmit} className="flex items-center gap-3">
             <input
               ref={inputRef}

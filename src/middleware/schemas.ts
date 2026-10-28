@@ -30,7 +30,8 @@ export const CreateBillSchema = z.object({
   recurring: z.boolean().default(false),
 });
 
-export const UpdateBillSchema = CreateBillSchema.omit({ userId: true }).partial();
+// isPaid lets the frontend undo "mark paid"; POST /:billId/pay only sets it to true
+export const UpdateBillSchema = CreateBillSchema.omit({ userId: true }).partial().extend({ isPaid: z.boolean().optional() });
 
 // ─── AI Chat ──────────────────────────────────────────────────────────────────
 

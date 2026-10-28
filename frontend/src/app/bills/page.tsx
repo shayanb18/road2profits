@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
+import { Loading } from "@/components/Loading";
 import { useProfile } from "@/hooks/useProfile";
-import { Bill } from "@/types";
 
 const PRIORITY_CFG = {
   high: { border: "#ef4444", bg: "rgba(239,68,68,0.06)", dot: "#ef4444", label: "High" },
@@ -11,42 +11,19 @@ const PRIORITY_CFG = {
   low: { border: "#374151", bg: "rgba(55,65,81,0.04)", dot: "#6b7280", label: "Low" },
 };
 
-function Loading() {
-  return (
-    <div className="flex h-screen items-center justify-center" style={{ background: "#0a0a0a" }}>
-      <div className="w-1.5 h-1.5 rounded-full animate-ping" style={{ background: "#333" }} />
-    </div>
-  );
-}
 
 export default function BillsPage() {
-  const { profile, ready, updateProfile } = useProfile();
-  const [paidIds, setPaidIds] = useState<Set<string>>(new Set());
+  const { profile, ready, error, setBillPaid } = useProfile();
+  const [saveError, setSaveError] = useState("");
+  const [now] = useState(Date.now);
 
-  // Merge paid state into bills
-  const bills: Bill[] = useMemo(() => {
-    if (!profile) return [];
-    return profile.bills.map((b) => ({ ...b, paid: paidIds.has(b.id) }));
-  }, [profile, paidIds]);
-
-  function togglePaid(id: string) {
-    if (!profile) return;
-    const next = new Set(paidIds);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    setPaidIds(next);
-
-    // Persist to localStorage
-    const updated = {
-      ...profile,
-      bills: profile.bills.map((b) =>
-        b.id === id ? { ...b, paid: !b.paid } : b
-      ),
-    };
-    updateProfile(updated);
+  function togglePaid(id: string, paid: boolean) {
+    setSaveError("");
+    setBillPaid(id, paid).catch(() => setSaveError("Couldn't save that change. Try again."));
   }
 
-  if (!ready || !profile) return <Loading />;
+  if (!ready || !profile) return <Loading error={error} />;
+  const bills = profile.bills;
 
   const unpaid = bills.filter((b) => !b.paid).sort(
     (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
@@ -55,13 +32,13 @@ export default function BillsPage() {
   const totalOwed = unpaid.reduce((s, b) => s + b.amount, 0);
 
   return (
-    <div className="flex h-screen overflow-hidden font-sans" style={{ background: "#0a0a0a", color: "#f0f0f0" }}>
-      <Sidebar />
+    <div className="flex flex-col md:flex-row h-dvh overflow-hidden font-sans" style={{ background: "#0a0a0a", color: "#f0f0f0" }}>
+      <Sidebar balance={profile?.currentBalance} />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         {/* Top bar */}
         <div
-          className="flex items-center justify-between px-8 py-4 shrink-0"
+          className="flex items-center justify-between gap-4 px-4 md:px-8 py-4 shrink-0"
           style={{ borderBottom: "1px solid #1a1a1a" }}
         >
           <div>
@@ -82,7 +59,7 @@ export default function BillsPage() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-8 py-6">
+        <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6">
           {bills.length === 0 ? (
             <div
               className="rounded-2xl py-16 text-center"
@@ -90,24 +67,27 @@ export default function BillsPage() {
             >
               <p className="text-[14px]" style={{ color: "#555" }}>No bills yet.</p>
               <p className="text-[12px] mt-1" style={{ color: "#333" }}>
-                Go through onboarding to add your bills.
+                Bills you add during setup show up here.
               </p>
             </div>
           ) : (
             <div className="space-y-6">
+              {saveError && (
+                <p role="alert" className="text-[13px]" style={{ color: "#ef4444" }}>{saveError}</p>
+              )}
               {/* Unpaid bills */}
               {unpaid.length > 0 && (
                 <div className="space-y-3">
                   {unpaid.map((bill) => {
                     const pc = PRIORITY_CFG[bill.priority];
                     const daysUntil = Math.ceil(
-                      (new Date(bill.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+                      (new Date(bill.dueDate).getTime() - now) / (1000 * 60 * 60 * 24)
                     );
                     const urgent = daysUntil >= 0 && daysUntil <= 3;
                     return (
                       <div
                         key={bill.id}
-                        className="rounded-2xl px-5 py-4 flex items-center justify-between"
+                        className="rounded-2xl px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
                         style={{
                           background: pc.bg,
                           border: `1px solid ${pc.border}30`,
@@ -117,7 +97,7 @@ export default function BillsPage() {
                         {/* Left info */}
                         <div className="flex items-center gap-4">
                           <div>
-                            <div className="flex items-center gap-2.5 mb-1">
+                            <div className="flex flex-wrap items-center gap-2.5 mb-1">
                               <p className="text-[15px] font-semibold text-white">{bill.name}</p>
                               <span
                                 className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-medium"
@@ -154,10 +134,10 @@ export default function BillsPage() {
                         </div>
 
                         {/* Right: amount + toggle */}
-                        <div className="flex items-center gap-5">
+                        <div className="flex items-center justify-between sm:justify-end gap-5">
                           <p className="text-2xl font-bold tabular-nums text-white">${bill.amount}</p>
                           <button
-                            onClick={() => togglePaid(bill.id)}
+                            onClick={() => togglePaid(bill.id, true)}
                             className="px-4 py-2 rounded-xl text-[12px] font-medium transition-all duration-100"
                             style={{
                               background: "rgba(255,255,255,0.05)",
@@ -175,7 +155,7 @@ export default function BillsPage() {
                               e.currentTarget.style.borderColor = "#2a2a2a";
                             }}
                           >
-                            Mark paid ✓
+                            Mark paid
                           </button>
                         </div>
                       </div>
@@ -209,7 +189,7 @@ export default function BillsPage() {
                             ${bill.amount}
                           </span>
                           <button
-                            onClick={() => togglePaid(bill.id)}
+                            onClick={() => togglePaid(bill.id, false)}
                             className="text-[11px] px-3 py-1.5 rounded-lg transition-colors"
                             style={{ color: "#333", border: "1px solid #1e1e1e" }}
                             onMouseEnter={(e) => (e.currentTarget.style.color = "#888")}

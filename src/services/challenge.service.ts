@@ -16,14 +16,14 @@ export function generateChallenge(insight: BudgetInsight): ChallengeTemplate {
       description:
         "You're over budget. Complete 5 no-spend days before your next payday to get back on track.",
       target: 5,
-      rewardLabel: "🏆 Budget Survivor Badge",
+      rewardLabel: "Budget Survivor Badge",
     });
     templates.push({
       title: "Cut Subscriptions",
       description:
         "Cancel or pause at least 1 subscription service this week to free up cash.",
       target: 1,
-      rewardLabel: "✂️ Subscription Slayer",
+      rewardLabel: "Subscription Slayer",
     });
   } else if (insight.status === "warning") {
     templates.push({
@@ -31,14 +31,14 @@ export function generateChallenge(insight: BudgetInsight): ChallengeTemplate {
       description:
         "Keep takeout and dining spending under $30 this week. Cook at home as much as possible.",
       target: 30,
-      rewardLabel: "🍳 Home Chef Badge",
+      rewardLabel: "Home Chef Badge",
     });
     templates.push({
       title: "Expense Logger",
       description:
         "Log every expense for 5 days straight. Awareness is the first step to saving.",
       target: 5,
-      rewardLabel: "📒 Money Tracker Badge",
+      rewardLabel: "Money Tracker Badge",
     });
   } else {
     templates.push({
@@ -46,21 +46,21 @@ export function generateChallenge(insight: BudgetInsight): ChallengeTemplate {
       description:
         "You're doing well! Challenge yourself to save an extra $20 toward your savings goal this week.",
       target: 20,
-      rewardLabel: "💰 Saver Streak Badge",
+      rewardLabel: "Saver Streak Badge",
     });
     templates.push({
       title: "Learn & Earn",
       description:
         "Complete 2 financial education modules this week to boost your money IQ.",
       target: 2,
-      rewardLabel: "🎓 Scholar Badge",
+      rewardLabel: "Scholar Badge",
     });
     templates.push({
       title: "Side Hustle Day",
       description:
         "Spend at least 2 hours this week pursuing a side hustle or skill-building activity.",
       target: 2,
-      rewardLabel: "💼 Hustle Mode Badge",
+      rewardLabel: "Hustle Mode Badge",
     });
   }
 

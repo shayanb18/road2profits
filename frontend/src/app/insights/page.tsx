@@ -2,14 +2,16 @@
 
 import { useMemo } from "react";
 import { Sidebar } from "@/components/Sidebar";
+import { Loading } from "@/components/Loading";
 import { useProfile } from "@/hooks/useProfile";
 import { computeForecast } from "@/lib/forecast";
+import { ExclamationTriangleIcon, ExclamationCircleIcon, LightBulbIcon } from "@heroicons/react/24/outline";
 
 const CARD_CFG = {
   danger: {
     border: "#ef4444",
     bg: "rgba(239,68,68,0.07)",
-    icon: "⚠",
+    Icon: ExclamationTriangleIcon,
     color: "#ef4444",
     label: "Urgent",
     labelBg: "rgba(239,68,68,0.1)",
@@ -17,7 +19,7 @@ const CARD_CFG = {
   warning: {
     border: "#eab308",
     bg: "rgba(234,179,8,0.07)",
-    icon: "◈",
+    Icon: ExclamationCircleIcon,
     color: "#eab308",
     label: "Heads Up",
     labelBg: "rgba(234,179,8,0.1)",
@@ -25,30 +27,23 @@ const CARD_CFG = {
   tip: {
     border: "#3b82f6",
     bg: "rgba(59,130,246,0.07)",
-    icon: "→",
+    Icon: LightBulbIcon,
     color: "#3b82f6",
     label: "Tip",
     labelBg: "rgba(59,130,246,0.1)",
   },
 };
 
-function Loading() {
-  return (
-    <div className="flex h-screen items-center justify-center" style={{ background: "#0a0a0a" }}>
-      <div className="w-1.5 h-1.5 rounded-full animate-ping" style={{ background: "#333" }} />
-    </div>
-  );
-}
 
 export default function InsightsPage() {
-  const { profile, ready } = useProfile();
+  const { profile, ready, error } = useProfile();
 
   const forecast = useMemo(
     () => (profile ? computeForecast(profile) : null),
     [profile]
   );
 
-  if (!ready || !forecast || !profile) return <Loading />;
+  if (!ready || !forecast || !profile) return <Loading error={error} />;
 
   const unpaidBills = profile.bills.filter((b) => !b.paid);
   const totalBills = unpaidBills.reduce((s, b) => s + b.amount, 0);
@@ -69,13 +64,13 @@ export default function InsightsPage() {
       : 0;
 
   return (
-    <div className="flex h-screen overflow-hidden font-sans" style={{ background: "#0a0a0a", color: "#f0f0f0" }}>
-      <Sidebar />
+    <div className="flex flex-col md:flex-row h-dvh overflow-hidden font-sans" style={{ background: "#0a0a0a", color: "#f0f0f0" }}>
+      <Sidebar balance={profile?.currentBalance} />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         {/* Top bar */}
         <div
-          className="flex items-center justify-between px-8 py-4 shrink-0"
+          className="flex items-center justify-between gap-4 px-4 md:px-8 py-4 shrink-0"
           style={{ borderBottom: "1px solid #1a1a1a" }}
         >
           <div>
@@ -86,11 +81,11 @@ export default function InsightsPage() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
+        <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 space-y-6">
 
           {/* Insight cards */}
           {forecast.insights.length > 0 ? (
-            <div className="grid gap-3" style={{ gridTemplateColumns: "1fr 1fr" }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {forecast.insights.map((insight) => {
                 const cfg = CARD_CFG[insight.type as keyof typeof CARD_CFG];
                 return (
@@ -104,9 +99,7 @@ export default function InsightsPage() {
                     }}
                   >
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="text-base font-bold" style={{ color: cfg.color }}>
-                        {cfg.icon}
-                      </span>
+                      <cfg.Icon aria-hidden className="w-4 h-4" style={{ color: cfg.color }} />
                       <span
                         className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold"
                         style={{ background: cfg.labelBg, color: cfg.color }}
@@ -126,7 +119,7 @@ export default function InsightsPage() {
               className="rounded-2xl py-12 text-center"
               style={{ background: "#111", border: "1px solid #222" }}
             >
-              <p className="text-[13px]" style={{ color: "#555" }}>No alerts — your finances look fine.</p>
+              <p className="text-[13px]" style={{ color: "#555" }}>No alerts. Your finances look fine.</p>
             </div>
           )}
 
@@ -154,7 +147,7 @@ export default function InsightsPage() {
             </div>
 
             {/* Legend */}
-            <div className="flex items-start justify-between gap-6">
+            <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: committedPct > 80 ? "#ef4444" : committedPct > 60 ? "#eab308" : "#3b82f6" }} />
                 <div>
