@@ -24,16 +24,36 @@ export function Logo({ size = 18 }: { size?: number }) {
   return <WalletIcon aria-hidden style={{ width: size, height: size, color: "#3b82f6" }} />;
 }
 
+// Forgets this browser's user and goes back to onboarding. Lives in the sidebar on desktop and on the dashboard on phones.
+export function StartOver() {
+  const router = useRouter();
+  return (
+    <button
+      onClick={() => {
+        clearUserId();
+        router.push("/onboarding");
+      }}
+      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-medium transition-all duration-100"
+      style={{ background: "transparent", color: "#555", border: "1px solid #1e1e1e" }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.color = "#ef4444";
+        e.currentTarget.style.borderColor = "rgba(239,68,68,0.3)";
+        e.currentTarget.style.background = "rgba(239,68,68,0.06)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.color = "#555";
+        e.currentTarget.style.borderColor = "#1e1e1e";
+        e.currentTarget.style.background = "transparent";
+      }}
+    >
+      Start over
+    </button>
+  );
+}
+
 // Desktop: left sidebar. Phones: bottom tab bar (order-last puts it under the page in a flex-col layout).
 export function Sidebar({ balance }: { balance?: number }) {
-  const router = useRouter();
   const pathname = usePathname();
-
-  function handleReset() {
-    clearUserId();
-    localStorage.removeItem("uniwallet-challenge");
-    router.push("/onboarding");
-  }
 
   return (
     <>
@@ -83,23 +103,7 @@ export function Sidebar({ balance }: { balance?: number }) {
 
         {/* Reset */}
         <div className="px-4 pt-6" style={{ borderTop: "1px solid #181818" }}>
-          <button
-            onClick={handleReset}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-medium transition-all duration-100"
-            style={{ background: "transparent", color: "#333", border: "1px solid #1e1e1e" }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "#ef4444";
-              e.currentTarget.style.borderColor = "rgba(239,68,68,0.3)";
-              e.currentTarget.style.background = "rgba(239,68,68,0.06)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "#333";
-              e.currentTarget.style.borderColor = "#1e1e1e";
-              e.currentTarget.style.background = "transparent";
-            }}
-          >
-            Start over
-          </button>
+          <StartOver />
         </div>
       </aside>
 

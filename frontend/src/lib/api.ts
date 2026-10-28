@@ -328,6 +328,16 @@ export const api = {
 
     updateProgress: (challengeId: string, progress: number) =>
       put<Challenge>(`/api/challenge/${challengeId}/progress`, { progress }),
+
+    /** Latest active or completed challenge, or null. Never creates one. */
+    current: (userId: string) =>
+      get<{ challenge: Challenge | null }>(`/api/challenge/${userId}/current`),
+
+    start: (body: { userId: string; title: string; description: string; target: number }) =>
+      post<Challenge>("/api/challenge", body),
+
+    skip: (challengeId: string) =>
+      post<Challenge>(`/api/challenge/${challengeId}/skip`),
   },
 
   // ── Side Hustles ───────────────────────────────────────────────────────────

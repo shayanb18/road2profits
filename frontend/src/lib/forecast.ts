@@ -1,3 +1,4 @@
+import { daysUntil } from "./dates";
 import { FinancialProfile, ForecastResult, Bill, BillPriority, Insight } from "@/types";
 
 export const PRIORITY_RANK: Record<BillPriority, number> = { high: 0, medium: 1, low: 2 };
@@ -54,15 +55,13 @@ export function computeForecast(profile: FinancialProfile): ForecastResult {
 
   // Bills due in the next 2 days
   for (const bill of unpaid) {
-    const daysUntil = Math.ceil(
-      (new Date(bill.dueDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-    );
-    if (daysUntil >= 0 && daysUntil <= 2) {
+    const days = daysUntil(bill.dueDate, now);
+    if (days >= 0 && days <= 2) {
       insights.push({
         id: `due-soon-${bill.id}`,
         type: "danger",
         message: `${bill.name} ($${bill.amount}) is due ${
-          daysUntil === 0 ? "today" : daysUntil === 1 ? "tomorrow" : "in 2 days"
+          days === 0 ? "today" : days === 1 ? "tomorrow" : "in 2 days"
         }.`,
       });
     }
@@ -94,9 +93,7 @@ export function computeForecast(profile: FinancialProfile): ForecastResult {
   }
 
   // Payday coming soon
-  const daysUntilPay = Math.ceil(
-    (payDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-  );
+  const daysUntilPay = daysUntil(nextPayDate, now);
   if (daysUntilPay > 0 && daysUntilPay <= 3 && status !== "over_budget") {
     insights.push({
       id: "pay-soon",

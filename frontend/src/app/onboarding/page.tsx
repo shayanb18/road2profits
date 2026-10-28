@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDay } from "@/lib/dates";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { StudentType, PayFrequency, Bill, BillPriority } from "@/types";
@@ -443,7 +444,7 @@ function Step3({
               <div className="flex items-center gap-5">
                 <span className="text-[12px] text-neutral-500">
                   Due{" "}
-                  {new Date(bill.dueDate).toLocaleDateString("en-CA", {
+                  {formatDay(bill.dueDate, {
                     month: "short",
                     day: "numeric",
                   })}
@@ -500,7 +501,7 @@ function Step4({ data }: { data: OnboardingData }) {
     {
       label: "Next pay date",
       value: data.nextPayDate
-        ? new Date(data.nextPayDate).toLocaleDateString("en-CA", {
+        ? formatDay(data.nextPayDate, {
             month: "long",
             day: "numeric",
             year: "numeric",

@@ -1,5 +1,6 @@
 "use client";
 
+import { daysUntil, formatDay } from "@/lib/dates";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Loading } from "@/components/Loading";
@@ -19,7 +20,7 @@ function getCoachResponse(
   const msg = message.toLowerCase();
   const balance = profile.currentBalance.toFixed(2);
   const projected = forecast.projectedBalance.toFixed(2);
-  const payDate = new Date(forecast.nextPayDate).toLocaleDateString("en-CA", {
+  const payDate = formatDay(forecast.nextPayDate, {
     month: "short",
     day: "numeric",
   });
@@ -63,9 +64,7 @@ function getCoachResponse(
   }
 
   if (msg.includes("payday") || msg.includes("pay day") || msg.includes("next pay")) {
-    const days = Math.ceil(
-      (new Date(forecast.nextPayDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-    );
+    const days = daysUntil(forecast.nextPayDate);
     return `Your next payday is ${payDate} — ${days > 0 ? `${days} day${days !== 1 ? "s" : ""} away` : "today!"}. ${days > 7 ? "That's a while. Be careful with spending." : days > 3 ? "Almost there. Stay disciplined." : "Nearly there — hold tight."}`;
   }
 

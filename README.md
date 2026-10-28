@@ -12,7 +12,7 @@ A student enters their balance, income, pay schedule and bills. UniWallet foreca
 | `frontend/` | Web app: onboarding, dashboard, bills, coach, challenge, insights | Next.js 16, React 19, Tailwind, Heroicons |
 | `tests.http` | Example requests for every endpoint (VS Code REST Client) | |
 
-**How they connect:** onboarding creates the profile and bills through the API, and the app loads them back from it, so marking a bill paid is saved in Postgres. The coach sends questions to the backend's GPT-4o-mini endpoint; if that fails (for example, no `OPENAI_API_KEY`), it answers with built-in rules and shows "Basic replies". The browser keeps only the user ID and the current challenge in `localStorage`. The dashboard forecast is still computed in the browser (`frontend/src/lib/forecast.ts`) from the data the API returns.
+**How they connect:** onboarding creates the profile and bills through the API, and the app loads them back from it, so marking a bill paid is saved in Postgres. The coach sends questions to the backend's GPT-4o-mini endpoint; if that fails (for example, no `OPENAI_API_KEY`), it answers with built-in rules and shows "Basic replies". The browser keeps only the user ID in `localStorage`; challenges are saved through `/api/challenge`. The dashboard forecast is still computed in the browser (`frontend/src/lib/forecast.ts`) from the data the API returns.
 
 ---
 
@@ -331,6 +331,29 @@ Returns updated challenge. Automatically sets status to `"completed"` if progres
 
 ---
 
+#### `GET /api/challenge/:userId/current`
+
+Returns `{ "challenge": <challenge> }` for the user's latest challenge if it's active or completed, or `{ "challenge": null }` if they have none or gave up. Unlike `GET /api/challenge/:userId`, it never creates one. The frontend's Challenge page uses this.
+
+---
+
+#### `POST /api/challenge` — Start a challenge the user picked
+
+**Request body:**
+```json
+{ "userId": "clxyz123", "title": "No takeout this week", "description": "Cook at home every day.", "target": 7 }
+```
+
+`target` is a whole number from 1 to 31. Any active challenge for the user is marked `"skipped"`. Returns the new challenge (201).
+
+---
+
+#### `POST /api/challenge/:challengeId/skip` — Give up
+
+Sets the challenge's status to `"skipped"`. Returns the updated challenge.
+
+---
+
 ### SIDE HUSTLES
 
 ---
@@ -595,6 +618,7 @@ road2profits/
 │       ├── components/        # Sidebar (bottom tab bar on phones), Loading
 │       ├── hooks/useProfile.ts # Loads profile + bills from the API
 │       ├── lib/api.ts         # Typed API client
+│       ├── lib/dates.ts       # Reads stored calendar days in UTC (test: dates.test.ts)
 │       ├── lib/forecast.ts    # Client-side budget forecast
 │       └── types/index.ts
 ├── prisma/
@@ -641,8 +665,6 @@ road2profits/
 ## Known issues
 
 - The rate limiter keeps its counts in memory, so they reset on restart and aren't shared between instances.
-- Dates entered as `YYYY-MM-DD` are stored as UTC midnight, so they can display one day early in time zones west of UTC (for example, a Nov 5 payday shows as Nov 4 in Ontario).
-- The challenge page keeps its challenge in `localStorage`; it doesn't use the backend's `/api/challenge` yet.
 
 ---
 

@@ -58,7 +58,7 @@ Student Financial Summary:
 - Budget status: ${insight.status}
 - Projected balance after upcoming bills: $${insight.projectedBalance.toFixed(2)}
 - Total unpaid bills: $${insight.totalUnpaidBills.toFixed(2)}
-- Upcoming unpaid bills: ${unpaidBills.map((b) => `${b.name} ($${b.amount} due ${new Date(b.dueDate).toLocaleDateString()})`).join(", ") || "None"}
+- Upcoming unpaid bills: ${unpaidBills.map((b) => `${b.name} ($${b.amount} due ${b.dueDate.toISOString().slice(0, 10)})`).join(", ") || "None"}
 - Budget recommendations: ${insight.recommendations.join(" | ")}
 `.trim();
 
