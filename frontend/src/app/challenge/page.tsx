@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Loading } from "@/components/Loading";
 import { useProfile } from "@/hooks/useProfile";
 import { Challenge } from "@/types";
+import { api, getUserId, type Challenge as ApiChallenge } from "@/lib/api";
 import { CheckBadgeIcon, FlagIcon, FireIcon } from "@heroicons/react/24/outline";
 
 // ─── Presets ──────────────────────────────────────────────────────────────────
@@ -36,52 +37,61 @@ function getMotivation(pct: number): string {
   return "Challenge complete. You did it.";
 }
 
-const CHALLENGE_KEY = "uniwallet-challenge";
-
+// Days are counted from when the challenge started (weekStart).
+function toChallenge(c: ApiChallenge): Challenge {
+  return {
+    id: c.id,
+    title: c.title,
+    description: c.description,
+    target: c.target,
+    current: c.progress,
+    deadline: new Date(new Date(c.weekStart).getTime() + c.target * 864e5).toISOString(),
+  };
+}
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ChallengePage() {
   const { profile, ready, error } = useProfile();
-  // Safe to read in the initializer: the page shows <Loading /> until the profile loads, so server and client render the same.
-  const [challenge, setChallenge] = useState<Challenge | null>(() => {
-    if (typeof window === "undefined") return null;
-    try {
-      const raw = localStorage.getItem(CHALLENGE_KEY);
-      return raw ? (JSON.parse(raw) as Challenge) : null;
-    } catch {
-      return null;
-    }
-  });
+  const [challenge, setChallenge] = useState<Challenge | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
-  function saveChallenge(c: Challenge) {
-    localStorage.setItem(CHALLENGE_KEY, JSON.stringify(c));
-    setChallenge(c);
+  useEffect(() => {
+    const userId = getUserId();
+    if (!userId) return; // useProfile sends the user to onboarding
+    api.challenge
+      .current(userId)
+      .then((r) => setChallenge(r.challenge && toChallenge(r.challenge)))
+      .catch(() => setSaveError("Couldn't load your challenge."))
+      .finally(() => setLoaded(true));
+  }, []);
+
+  function save(request: Promise<ApiChallenge | null>) {
+    setSaveError("");
+    request
+      .then((c) => setChallenge(c && toChallenge(c)))
+      .catch(() => setSaveError("Couldn't save that change. Try again."));
   }
 
   function startPreset(preset: typeof PRESETS[0]) {
-    const now = new Date();
-    const deadline = new Date(now.getTime() + preset.target * 24 * 60 * 60 * 1000);
-    saveChallenge({
-      id: String(now.getTime()),
-      ...preset,
-      current: 0,
-      deadline: deadline.toISOString().split("T")[0],
-    });
+    const userId = getUserId();
+    if (userId) save(api.challenge.start({ userId, ...preset }));
   }
 
   function completeDay() {
     if (!challenge || challenge.current >= challenge.target) return;
-    const updated = { ...challenge, current: challenge.current + 1 };
-    saveChallenge(updated);
+    save(api.challenge.updateProgress(challenge.id, challenge.current + 1));
   }
 
+  // A finished challenge stays on record as completed; only an unfinished one is marked skipped.
   function abandonChallenge() {
-    localStorage.removeItem(CHALLENGE_KEY);
-    setChallenge(null);
+    if (!challenge) return;
+    if (challenge.current >= challenge.target) setChallenge(null);
+    else save(api.challenge.skip(challenge.id).then(() => null));
   }
 
-  if (!ready) return <Loading error={error} />;
+  if (!ready || !loaded) return <Loading error={error} />;
 
   const pct = challenge ? challenge.current / challenge.target : 0;
   const daysLeft = challenge
@@ -108,6 +118,9 @@ export default function ChallengePage() {
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6">
+          {saveError && (
+            <p role="alert" className="max-w-xl mb-4 text-[13px]" style={{ color: "#ef4444" }}>{saveError}</p>
+          )}
           {challenge ? (
             <div className="max-w-xl space-y-4">
               {/* Active challenge card */}

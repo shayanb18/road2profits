@@ -46,6 +46,13 @@ export const UpdateProgressSchema = z.object({
   progress: z.number().min(0),
 });
 
+export const StartChallengeSchema = z.object({
+  userId: z.string().min(1),
+  title: z.string().min(1).max(200),
+  description: z.string().max(500).default(""),
+  target: z.number().int().min(1).max(31),
+});
+
 // ─── Savings Goals ────────────────────────────────────────────────────────────
 
 export const CreateSavingsGoalSchema = z.object({

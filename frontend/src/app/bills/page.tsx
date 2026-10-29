@@ -1,5 +1,6 @@
 "use client";
 
+import { daysUntil, formatDay } from "@/lib/dates";
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Loading } from "@/components/Loading";
@@ -80,10 +81,8 @@ export default function BillsPage() {
                 <div className="space-y-3">
                   {unpaid.map((bill) => {
                     const pc = PRIORITY_CFG[bill.priority];
-                    const daysUntil = Math.ceil(
-                      (new Date(bill.dueDate).getTime() - now) / (1000 * 60 * 60 * 24)
-                    );
-                    const urgent = daysUntil >= 0 && daysUntil <= 3;
+                    const days = daysUntil(bill.dueDate, new Date(now));
+                    const urgent = days >= 0 && days <= 3;
                     return (
                       <div
                         key={bill.id}
@@ -118,17 +117,17 @@ export default function BillsPage() {
                                     border: "1px solid rgba(239,68,68,0.2)",
                                   }}
                                 >
-                                  {daysUntil === 0 ? "Due today" : daysUntil === 1 ? "Due tomorrow" : `${daysUntil}d left`}
+                                  {days === 0 ? "Due today" : days === 1 ? "Due tomorrow" : `${days}d left`}
                                 </span>
                               )}
                             </div>
                             <p className="text-[12px]" style={{ color: "#555" }}>
                               Due{" "}
-                              {new Date(bill.dueDate).toLocaleDateString("en-CA", {
+                              {formatDay(bill.dueDate, {
                                 month: "long",
                                 day: "numeric",
                               })}
-                              {!urgent && ` · ${daysUntil > 0 ? `${daysUntil} days away` : "overdue"}`}
+                              {!urgent && ` · ${days > 0 ? `${days} days away` : "overdue"}`}
                             </p>
                           </div>
                         </div>

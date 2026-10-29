@@ -1,8 +1,9 @@
 "use client";
 
+import { formatDay } from "@/lib/dates";
 import { useMemo } from "react";
 import Link from "next/link";
-import { Sidebar } from "@/components/Sidebar";
+import { Sidebar, StartOver } from "@/components/Sidebar";
 import { Loading } from "@/components/Loading";
 import { useProfile } from "@/hooks/useProfile";
 import { computeForecast } from "@/lib/forecast";
@@ -141,7 +142,7 @@ export default function DashboardPage() {
                     Next payday
                   </p>
                   <p className="text-xl font-semibold text-white">
-                    {new Date(forecast.nextPayDate).toLocaleDateString("en-CA", {
+                    {formatDay(forecast.nextPayDate, {
                       month: "short",
                       day: "numeric",
                     })}
@@ -305,6 +306,10 @@ export default function DashboardPage() {
             </div>
             <span className="text-[20px] shrink-0 ml-4" style={{ color: "#3b82f6" }}>→</span>
           </Link>
+
+          <div className="md:hidden pt-4">
+            <StartOver />
+          </div>
 
           <div className="pb-2" />
         </div>
