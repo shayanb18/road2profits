@@ -95,6 +95,31 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+/* The landing page's light palette (putty ground, white cards, teal), for screens that follow its look.
+   Every text token is 4.5:1 or more on --uw-bg. */
+.uw-light {
+  --uw-bg: #dedad3;
+  --uw-surface: #ffffff;
+  --uw-raised: #ebe8e3;
+  --uw-line: #cbc6be;
+  --uw-ink: #0a0a0a;
+  --uw-muted: #55514c;
+  --uw-faint: #5f5b56;
+  --uw-accent: #256f82;
+  --uw-accent-hover: #1d5b6b;
+  --uw-accent-text: #1d5b6b;
+  /* the landing hero's lit sky panel */
+  --uw-lit: radial-gradient(70% 60% at 18% 12%, #eef2f6, transparent 70%),
+    radial-gradient(60% 50% at 90% 100%, #a9bdd0, transparent 70%), #c6d3df;
+  --uw-lit-ink: #25303a;
+  --uw-lit-muted: #4d5964;
+  /* status: text, tint, line (the landing page's chips) */
+  --uw-red: #a3271b; --uw-red-bg: #fbe6e3; --uw-red-line: #f0c4bd;
+  --uw-amber: #8a5300; --uw-amber-bg: #fdf0dc; --uw-amber-line: #f0d6a6;
+  --uw-green: #17673f; --uw-green-bg: #e7f4ec; --uw-green-line: #bfe0cb;
+  color-scheme: light;
+}
+
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);

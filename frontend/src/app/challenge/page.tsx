@@ -106,50 +106,45 @@ export default function ChallengePage() {
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         {/* Top bar */}
         <div
-          className="flex items-center justify-between gap-4 px-4 md:px-8 py-4 shrink-0"
-          style={{ borderBottom: "1px solid var(--uw-line)" }}
+          className="flex items-end justify-between gap-4 px-5 md:px-10 pt-8 md:pt-10 pb-4 shrink-0"
         >
           <div>
-            <h1 className="text-[15px] font-semibold text-white leading-none mb-0.5">Your Challenge</h1>
-            <p className="text-[12px]" style={{ color: "var(--uw-faint)" }}>
+            <h1 className="text-[32px] md:text-[40px] leading-[1.08] font-normal tracking-[-0.035em] text-[var(--uw-ink)] mb-2">Your challenge</h1>
+            <p className="text-[16px]" style={{ color: "var(--uw-muted)" }}>
               {challenge ? "Active challenge" : "No active challenge. Pick one."}
             </p>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6">
+        <div className="flex-1 overflow-y-auto px-5 md:px-10 py-4 md:py-6">
           {saveError && (
-            <p role="alert" className="max-w-xl mb-4 text-[13px]" style={{ color: "#ef4444" }}>{saveError}</p>
+            <p role="alert" className="max-w-xl mb-4 rounded-lg px-4 py-3 text-[14px] bg-[var(--uw-red-bg)] text-[var(--uw-red)]">{saveError}</p>
           )}
           {challenge ? (
             <div className="max-w-xl space-y-4">
               {/* Active challenge card */}
               <div
-                className="rounded-2xl px-5 md:px-7 py-6"
+                className="rounded-[20px] px-5 md:px-7 py-6"
                 style={{
-                  background: complete
-                    ? "rgba(34,197,94,0.06)"
-                    : "rgb(37 111 130 / 0.05)",
-                  border: complete
-                    ? "1px solid rgba(34,197,94,0.2)"
-                    : "1px solid rgb(37 111 130 / 0.15)",
+                  background: "var(--uw-surface)",
+                  border: complete ? "1px solid var(--uw-green-line)" : "1px solid var(--uw-line)",
                 }}
               >
                 {/* Header */}
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div>
                     <p
-                      className="text-[11px] uppercase tracking-widest font-medium mb-2"
-                      style={{ color: complete ? "#22c55e" : "#3b82f6" }}
+                      className="text-[13px] font-medium mb-2"
+                      style={{ color: complete ? "var(--uw-green)" : "var(--uw-accent-text)" }}
                     >
-                      {complete ? "Complete" : "In Progress"}
+                      {complete ? "Complete" : "In progress"}
                     </p>
-                    <h2 className="text-xl font-bold text-white leading-snug">
+                    <h2 className="text-[28px] font-normal tracking-[-0.03em] text-[var(--uw-ink)] leading-tight">
                       {challenge.title}
                     </h2>
                   </div>
                   {complete ? (
-                    <CheckBadgeIcon aria-hidden className="w-8 h-8 shrink-0" style={{ color: "#22c55e" }} />
+                    <CheckBadgeIcon aria-hidden className="w-8 h-8 shrink-0" style={{ color: "var(--uw-green)" }} />
                   ) : (
                     <FlagIcon aria-hidden className="w-8 h-8 shrink-0" style={{ color: "var(--uw-accent-text)" }} />
                   )}
@@ -164,7 +159,7 @@ export default function ChallengePage() {
                   <span className="text-[12px]" style={{ color: "var(--uw-muted)" }}>
                     {challenge.current} of {challenge.target} days
                   </span>
-                  <span className="text-[12px] font-semibold" style={{ color: complete ? "#22c55e" : "#3b82f6" }}>
+                  <span className="text-[12px] font-medium" style={{ color: complete ? "var(--uw-green)" : "var(--uw-accent-text)" }}>
                     {Math.round(pct * 100)}%
                   </span>
                 </div>
@@ -177,7 +172,7 @@ export default function ChallengePage() {
                     style={{
                       width: `${pct * 100}%`,
                       background: complete
-                        ? "linear-gradient(90deg, #15803d, #4ade80)"
+                        ? "var(--uw-green)"
                         : "var(--uw-accent)",
                     }}
                   />
@@ -186,35 +181,35 @@ export default function ChallengePage() {
                 {/* Stats row */}
                 <div
                   className="flex items-center gap-6 py-4 mb-5"
-                  style={{ borderTop: "1px solid rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+                  style={{ borderTop: "1px solid var(--uw-raised)", borderBottom: "1px solid var(--uw-raised)" }}
                 >
                   <div>
-                    <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "var(--uw-faint)" }}>
+                    <p className="text-[13px] mb-1 font-medium" style={{ color: "var(--uw-faint)" }}>
                       Days left
                     </p>
-                    <p className="text-2xl font-bold text-white tabular-nums">{daysLeft}</p>
+                    <p className="text-2xl font-medium text-[var(--uw-ink)] tabular-nums">{daysLeft}</p>
                   </div>
                   <div
                     className="w-px self-stretch"
-                    style={{ background: "rgba(255,255,255,0.05)" }}
+                    style={{ background: "var(--uw-raised)" }}
                   />
                   <div>
-                    <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "var(--uw-faint)" }}>
+                    <p className="text-[13px] mb-1 font-medium" style={{ color: "var(--uw-faint)" }}>
                       Streak
                     </p>
-                    <p className="text-2xl font-bold text-white tabular-nums">
+                    <p className="text-2xl font-medium text-[var(--uw-ink)] tabular-nums">
                       {challenge.current}
                     </p>
                   </div>
                   <div
                     className="w-px self-stretch"
-                    style={{ background: "rgba(255,255,255,0.05)" }}
+                    style={{ background: "var(--uw-raised)" }}
                   />
                   <div>
-                    <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "var(--uw-faint)" }}>
+                    <p className="text-[13px] mb-1 font-medium" style={{ color: "var(--uw-faint)" }}>
                       Deadline
                     </p>
-                    <p className="text-[14px] font-semibold text-white">
+                    <p className="text-[14px] font-medium text-[var(--uw-ink)]">
                       {new Date(challenge.deadline).toLocaleDateString("en-CA", {
                         month: "short",
                         day: "numeric",
@@ -233,7 +228,7 @@ export default function ChallengePage() {
                   {!complete && (
                     <button
                       onClick={completeDay}
-                      className="flex-1 py-3 rounded-xl text-[13px] font-semibold transition-all duration-100"
+                      className="flex-1 py-3 rounded-xl text-[13px] font-medium transition-all duration-100"
                       style={{ background: "var(--uw-accent)", color: "#fff" }}
                       onMouseEnter={(e) => (e.currentTarget.style.background = "var(--uw-accent-hover)")}
                       onMouseLeave={(e) => (e.currentTarget.style.background = "var(--uw-accent)")}
@@ -250,8 +245,8 @@ export default function ChallengePage() {
                       border: "1px solid var(--uw-line)",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.color = "#ef4444";
-                      e.currentTarget.style.borderColor = "rgba(239,68,68,0.3)";
+                      e.currentTarget.style.color = "var(--uw-red)";
+                      e.currentTarget.style.borderColor = "var(--uw-red-line)";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.color = "var(--uw-faint)";
@@ -266,12 +261,12 @@ export default function ChallengePage() {
               {/* Streak callout */}
               {challenge.current > 0 && (
                 <div
-                  className="rounded-2xl px-5 py-4 flex items-center gap-4"
+                  className="rounded-[20px] px-5 py-4 flex items-center gap-4"
                   style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)" }}
                 >
-                  <FireIcon aria-hidden className="w-7 h-7 shrink-0" style={{ color: "#f97316" }} />
+                  <FireIcon aria-hidden className="w-7 h-7 shrink-0" style={{ color: "var(--uw-amber)" }} />
                   <div>
-                    <p className="text-[14px] font-semibold text-white">
+                    <p className="text-[14px] font-medium text-[var(--uw-ink)]">
                       {challenge.current} day streak
                     </p>
                     <p className="text-[12px]" style={{ color: "var(--uw-faint)" }}>
@@ -289,13 +284,13 @@ export default function ChallengePage() {
             /* No challenge — show presets */
             <div className="max-w-xl space-y-4">
               <div
-                className="rounded-2xl px-6 py-5"
+                className="rounded-[20px] px-6 py-5"
                 style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)" }}
               >
-                <p className="text-[11px] uppercase tracking-widest mb-1" style={{ color: "var(--uw-faint)" }}>
+                <p className="text-[13px] mb-1 font-medium" style={{ color: "var(--uw-faint)" }}>
                   No active challenge
                 </p>
-                <h2 className="text-[16px] font-semibold text-white mb-1">
+                <h2 className="text-[16px] font-medium text-[var(--uw-ink)] mb-1">
                   Start a challenge to build better habits
                 </h2>
                 <p className="text-[13px]" style={{ color: "var(--uw-faint)" }}>
@@ -307,11 +302,11 @@ export default function ChallengePage() {
                 {PRESETS.map((preset, i) => (
                   <div
                     key={i}
-                    className="rounded-2xl px-5 py-5 flex items-start justify-between gap-4"
+                    className="rounded-[20px] px-5 py-5 flex items-start justify-between gap-4"
                     style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)" }}
                   >
                     <div className="flex-1">
-                      <p className="text-[14px] font-semibold text-white mb-1">{preset.title}</p>
+                      <p className="text-[14px] font-medium text-[var(--uw-ink)] mb-1">{preset.title}</p>
                       <p className="text-[12px] leading-snug" style={{ color: "var(--uw-muted)" }}>
                         {preset.description}
                       </p>
@@ -321,7 +316,7 @@ export default function ChallengePage() {
                     </div>
                     <button
                       onClick={() => startPreset(preset)}
-                      className="shrink-0 px-4 py-2 rounded-xl text-[12px] font-semibold transition-all duration-100"
+                      className="shrink-0 px-4 py-2 rounded-xl text-[12px] font-medium transition-all duration-100"
                       style={{
                         background: "rgb(37 111 130 / 0.1)",
                         color: "var(--uw-accent-text)",

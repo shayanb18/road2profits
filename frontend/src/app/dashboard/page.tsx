@@ -7,6 +7,7 @@ import { Sidebar, StartOver } from "@/components/Sidebar";
 import { Loading } from "@/components/Loading";
 import { useProfile } from "@/hooks/useProfile";
 import { computeForecast } from "@/lib/forecast";
+import { CARD, CHIP, chipStyle, PRIORITY_TONE, type Tone } from "@/components/ui";
 import { ExclamationTriangleIcon, ExclamationCircleIcon, LightBulbIcon } from "@heroicons/react/24/outline";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -14,33 +15,36 @@ import { ExclamationTriangleIcon, ExclamationCircleIcon, LightBulbIcon } from "@
 const STATUS_CFG = {
   safe: {
     label: "You're on track",
-    accent: "#22c55e",
-    glow: "rgba(34,197,94,0.12)",
+    accent: "var(--uw-green)",
+    glow: "var(--uw-green-bg)",
+    tone: "green" as Tone,
     badge: "Safe",
   },
   warning: {
     label: "Heads up, it's tight",
-    accent: "#eab308",
-    glow: "rgba(234,179,8,0.12)",
-    badge: "Warning",
+    accent: "var(--uw-amber)",
+    glow: "var(--uw-amber-bg)",
+    tone: "amber" as Tone,
+    badge: "Tight",
   },
   over_budget: {
     label: "You're over budget",
-    accent: "#ef4444",
-    glow: "rgba(239,68,68,0.12)",
-    badge: "Over Budget",
+    accent: "var(--uw-red)",
+    glow: "var(--uw-red-bg)",
+    tone: "red" as Tone,
+    badge: "Over budget",
   },
 };
 
 const PRIORITY_CFG = {
-  high: { dot: "#ef4444", label: "high" },
-  medium: { dot: "#eab308", label: "med" },
-  low: { dot: "var(--uw-muted)", label: "low" },
+  high: { dot: "var(--uw-red)", label: "High" },
+  medium: { dot: "var(--uw-amber)", label: "Medium" },
+  low: { dot: "var(--uw-muted)", label: "Low" },
 };
 
 const INSIGHT_CFG = {
-  danger: { border: "#ef4444", bg: "rgba(239,68,68,0.07)", Icon: ExclamationTriangleIcon, color: "#ef4444" },
-  warning: { border: "#eab308", bg: "rgba(234,179,8,0.07)", Icon: ExclamationCircleIcon, color: "#eab308" },
+  danger: { border: "var(--uw-red)", bg: "var(--uw-red-bg)", Icon: ExclamationTriangleIcon, color: "var(--uw-red)" },
+  warning: { border: "var(--uw-amber)", bg: "var(--uw-amber-bg)", Icon: ExclamationCircleIcon, color: "var(--uw-amber)" },
   tip: { border: "var(--uw-accent)", bg: "rgb(37 111 130 / 0.07)", Icon: LightBulbIcon, color: "var(--uw-accent-text)" },
 };
 
@@ -68,12 +72,11 @@ export default function DashboardPage() {
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         {/* Top bar */}
         <div
-          className="flex items-center justify-between gap-4 px-4 md:px-8 py-4 shrink-0"
-          style={{ borderBottom: "1px solid var(--uw-line)" }}
+          className="flex items-end justify-between gap-4 px-5 md:px-10 pt-8 md:pt-10 pb-4 shrink-0"
         >
           <div>
-            <h1 className="text-[15px] font-semibold text-white leading-none mb-0.5">Dashboard</h1>
-            <p className="text-[12px]" style={{ color: "var(--uw-faint)" }}>Your financial snapshot</p>
+            <h1 className="text-[32px] md:text-[40px] leading-[1.08] font-normal tracking-[-0.035em] text-[var(--uw-ink)] mb-2">Dashboard</h1>
+            <p className="text-[16px]" style={{ color: "var(--uw-muted)" }}>Your financial snapshot</p>
           </div>
           <span
             className="text-[11px] px-3 py-1.5 rounded-lg"
@@ -84,40 +87,29 @@ export default function DashboardPage() {
         </div>
 
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 space-y-5">
+        <div className="flex-1 overflow-y-auto px-5 md:px-10 py-4 md:py-6 space-y-5">
 
           {/* ── Status Banner ── */}
           <div
-            className="rounded-2xl px-5 md:px-8 py-6 md:py-7"
-            style={{
-              background: `linear-gradient(135deg, ${s.glow} 0%, rgba(255,255,255,0.01) 100%)`,
-              border: `1px solid ${s.accent}22`,
-              boxShadow: `0 0 60px ${s.glow}`,
-            }}
+            className={`${CARD} px-6 md:px-8 py-7 md:py-8`}
           >
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
               {/* Left: status headline */}
               <div>
                 <div className="flex items-center gap-3 mb-3">
-                  <span
-                    className="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider"
-                    style={{
-                      background: `${s.accent}18`,
-                      color: s.accent,
-                      border: `1px solid ${s.accent}30`,
-                    }}
-                  >
+                  <span className={CHIP} style={chipStyle(s.tone)}>
+                    <span aria-hidden className="w-1.5 h-1.5 rounded-full bg-current" />
                     {s.badge}
                   </span>
                 </div>
-                <p className="text-2xl md:text-3xl font-bold tracking-tight mb-2" style={{ color: s.accent }}>
+                <p className="text-[28px] md:text-[32px] font-normal tracking-[-0.03em] mb-2 text-[var(--uw-ink)]">
                   {s.label}
                 </p>
                 <div className="mt-4">
-                  <p className="text-[11px] uppercase tracking-widest mb-1" style={{ color: "var(--uw-faint)" }}>
+                  <p className="text-[13px] mb-1 font-medium" style={{ color: "var(--uw-faint)" }}>
                     You&apos;ll have this much before payday
                   </p>
-                  <p className="text-4xl font-bold tabular-nums" style={{ color: forecast.projectedBalance < 0 ? "#ef4444" : "#f0f0f0" }}>
+                  <p className="text-[44px] md:text-[56px] leading-none font-normal tracking-[-0.035em] tabular-nums" style={{ color: forecast.projectedBalance < 0 ? "var(--uw-red)" : "var(--uw-ink)" }}>
                     {forecast.projectedBalance < 0 ? "-" : ""}$
                     {Math.abs(forecast.projectedBalance).toFixed(2)}
                   </p>
@@ -127,21 +119,21 @@ export default function DashboardPage() {
               {/* Right: key stats */}
               <div
                 className="flex flex-wrap gap-x-8 gap-y-4 shrink-0 pt-5 md:pt-1 md:pl-8 border-t md:border-t-0 md:border-l"
-                style={{ borderColor: "rgba(255,255,255,0.06)" }}
+                style={{ borderColor: "var(--uw-raised)" }}
               >
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "var(--uw-faint)" }}>
+                  <p className="text-[13px] mb-2 font-medium" style={{ color: "var(--uw-faint)" }}>
                     Current balance
                   </p>
-                  <p className="text-xl font-semibold text-white tabular-nums">
+                  <p className="text-xl font-medium text-[var(--uw-ink)] tabular-nums">
                     ${profile.currentBalance.toFixed(2)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "var(--uw-faint)" }}>
+                  <p className="text-[13px] mb-2 font-medium" style={{ color: "var(--uw-faint)" }}>
                     Next payday
                   </p>
-                  <p className="text-xl font-semibold text-white">
+                  <p className="text-xl font-medium text-[var(--uw-ink)]">
                     {formatDay(forecast.nextPayDate, {
                       month: "short",
                       day: "numeric",
@@ -149,10 +141,10 @@ export default function DashboardPage() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "var(--uw-faint)" }}>
+                  <p className="text-[13px] mb-2 font-medium" style={{ color: "var(--uw-faint)" }}>
                     Next bill due
                   </p>
-                  <p className="text-xl font-semibold text-white">
+                  <p className="text-xl font-medium text-[var(--uw-ink)]">
                     {forecast.nextBillDue ? (
                       <>
                         {forecast.nextBillDue.name}{" "}
@@ -173,12 +165,12 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
             {/* Bills priority */}
-            <div className="rounded-2xl overflow-hidden" style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)" }}>
+            <div className="rounded-[20px] overflow-hidden" style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)" }}>
               <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid var(--uw-line)" }}>
-                <p className="text-[11px] uppercase tracking-[0.16em] font-medium" style={{ color: "var(--uw-muted)" }}>
-                  Bills Priority
+                <p className="text-[16px] font-medium text-[var(--uw-ink)]">
+                  Pay these first
                 </p>
-                <span className="text-[10px]" style={{ color: "var(--uw-faint)" }}>by due date</span>
+                <span className="text-[13px]" style={{ color: "var(--uw-faint)" }}>by due date</span>
               </div>
               {forecast.prioritizedBills.length > 0 ? (
                 <>
@@ -189,24 +181,20 @@ export default function DashboardPage() {
                         <div
                           key={bill.id}
                           className="flex items-center justify-between rounded-xl px-3 py-3"
-                          style={{ background: i === 0 ? "rgba(255,255,255,0.04)" : "transparent" }}
+                          style={{ background: i === 0 ? "var(--uw-raised)" : "transparent" }}
                         >
                           <div className="flex items-center gap-3">
-                            <span className="text-[10px] font-mono w-4 tabular-nums text-center" style={{ color: "var(--uw-faint)" }}>
+                            <span className="text-[13px] w-4 tabular-nums text-center" style={{ color: "var(--uw-faint)" }}>
                               {i + 1}
                             </span>
-                            <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: pc.dot }} />
-                            <span className="text-[13px] font-medium" style={{ color: i === 0 ? "var(--uw-ink)" : "var(--uw-muted)" }}>
+                                                        <span className="text-[15px] font-medium" style={{ color: i === 0 ? "var(--uw-ink)" : "var(--uw-muted)" }}>
                               {bill.name}
                             </span>
-                            <span
-                              className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded"
-                              style={{ background: `${pc.dot}14`, color: pc.dot, border: `1px solid ${pc.dot}25` }}
-                            >
+                            <span className={CHIP} style={chipStyle(PRIORITY_TONE[bill.priority])}>
                               {pc.label}
                             </span>
                           </div>
-                          <span className="text-[13px] font-semibold tabular-nums" style={{ color: i === 0 ? "#fff" : "#555" }}>
+                          <span className="text-[15px] font-medium tabular-nums" style={{ color: i === 0 ? "var(--uw-ink)" : "var(--uw-muted)" }}>
                             ${bill.amount}
                           </span>
                         </div>
@@ -214,8 +202,8 @@ export default function DashboardPage() {
                     })}
                   </div>
                   <div className="px-5 py-3 flex justify-between" style={{ borderTop: "1px solid var(--uw-line)" }}>
-                    <span className="text-[11px] uppercase tracking-widest" style={{ color: "var(--uw-faint)" }}>Total</span>
-                    <span className="text-[13px] font-semibold tabular-nums" style={{ color: "var(--uw-muted)" }}>
+                    <span className="text-[13px] font-medium" style={{ color: "var(--uw-faint)" }}>Total</span>
+                    <span className="text-[13px] font-medium tabular-nums" style={{ color: "var(--uw-muted)" }}>
                       ${forecast.prioritizedBills.reduce((s, b) => s + b.amount, 0)}
                     </span>
                   </div>
@@ -228,12 +216,12 @@ export default function DashboardPage() {
             </div>
 
             {/* Insights */}
-            <div className="rounded-2xl overflow-hidden" style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)" }}>
+            <div className="rounded-[20px] overflow-hidden" style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)" }}>
               <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid var(--uw-line)" }}>
-                <p className="text-[11px] uppercase tracking-[0.16em] font-medium" style={{ color: "var(--uw-muted)" }}>
+                <p className="text-[16px] font-medium text-[var(--uw-ink)]">
                   Insights
                 </p>
-                <span className="text-[10px]" style={{ color: "var(--uw-faint)" }}>
+                <span className="text-[13px]" style={{ color: "var(--uw-faint)" }}>
                   {forecast.insights.length} alert{forecast.insights.length !== 1 ? "s" : ""}
                 </span>
               </div>
@@ -245,10 +233,10 @@ export default function DashboardPage() {
                       <div
                         key={insight.id}
                         className="rounded-xl px-4 py-3 flex items-start gap-3"
-                        style={{ background: ic.bg, border: `1px solid ${ic.border}20`, borderLeft: `3px solid ${ic.border}` }}
+                        style={{ background: ic.bg, border: `1px solid color-mix(in srgb, ${ic.border} 13%, transparent)`, borderLeft: `3px solid ${ic.border}` }}
                       >
                         <ic.Icon aria-hidden className="w-4 h-4 shrink-0 mt-0.5" style={{ color: ic.color }} />
-                        <p className="text-[13px] leading-snug" style={{ color: "var(--uw-ink)" }}>{insight.message}</p>
+                        <p className="text-[15px] leading-snug" style={{ color: "var(--uw-ink)" }}>{insight.message}</p>
                       </div>
                     );
                   })
@@ -259,19 +247,19 @@ export default function DashboardPage() {
             </div>
 
             {/* Recommendations */}
-            <div className="rounded-2xl overflow-hidden" style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)" }}>
+            <div className="rounded-[20px] overflow-hidden" style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)" }}>
               <div className="px-5 py-4" style={{ borderBottom: "1px solid var(--uw-line)" }}>
-                <p className="text-[11px] uppercase tracking-[0.16em] font-medium" style={{ color: "var(--uw-muted)" }}>
+                <p className="text-[16px] font-medium text-[var(--uw-ink)]">
                   What to do
                 </p>
               </div>
               <div className="p-4 space-y-3">
                 {forecast.recommendations.map((rec, i) => (
                   <div key={i} className="flex items-start gap-3">
-                    <span className="text-[11px] font-mono shrink-0 mt-0.5 tabular-nums" style={{ color: "var(--uw-faint)" }}>
+                    <span className="text-[13px] shrink-0 mt-0.5 tabular-nums" style={{ color: "var(--uw-faint)" }}>
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <p className="text-[13px] leading-snug" style={{ color: "var(--uw-muted)" }}>{rec}</p>
+                    <p className="text-[15px] leading-snug" style={{ color: "var(--uw-ink)" }}>{rec}</p>
                   </div>
                 ))}
               </div>
@@ -281,30 +269,18 @@ export default function DashboardPage() {
           {/* ── Chat CTA ── */}
           <Link
             href="/coach"
-            className="flex items-center justify-between px-6 py-4 rounded-2xl transition-all duration-150"
-            style={{
-              background: "rgb(37 111 130 / 0.08)",
-              border: "1px solid rgb(37 111 130 / 0.2)",
-              textDecoration: "none",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "rgb(37 111 130 / 0.13)";
-              (e.currentTarget as HTMLElement).style.borderColor = "rgb(37 111 130 / 0.35)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "rgb(37 111 130 / 0.08)";
-              (e.currentTarget as HTMLElement).style.borderColor = "rgb(37 111 130 / 0.2)";
-            }}
+            className="flex items-center justify-between px-6 md:px-8 py-6 rounded-[20px] transition-transform duration-150 hover:-translate-y-0.5"
+            style={{ background: "var(--uw-lit)", color: "var(--uw-lit-ink)" }}
           >
             <div>
-              <p className="text-[14px] font-semibold" style={{ color: "var(--uw-accent-text)" }}>
-                Chat with your AI Coach
+              <p className="text-[20px] font-medium tracking-[-0.02em]">
+                Ask your money coach
               </p>
-              <p className="text-[12px] mt-0.5" style={{ color: "var(--uw-faint)" }}>
-                Ask anything about your money — no jargon, just honest answers
+              <p className="text-[15px] mt-1" style={{ color: "var(--uw-lit-muted)" }}>
+                It answers with your own balance, bills and payday.
               </p>
             </div>
-            <span className="text-[20px] shrink-0 ml-4" style={{ color: "var(--uw-accent-text)" }}>→</span>
+            <span className="w-11 h-11 rounded-full bg-white flex items-center justify-center shrink-0 ml-4 text-[var(--uw-accent)]" aria-hidden>→</span>
           </Link>
 
           <div className="md:hidden pt-4">

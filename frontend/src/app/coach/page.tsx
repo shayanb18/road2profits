@@ -167,20 +167,19 @@ export default function CoachPage() {
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         {/* Top bar */}
         <div
-          className="flex items-center justify-between gap-4 px-4 md:px-8 py-4 shrink-0"
-          style={{ borderBottom: "1px solid var(--uw-line)" }}
+          className="flex items-end justify-between gap-4 px-5 md:px-10 pt-8 md:pt-10 pb-4 shrink-0"
         >
           <div>
-            <h1 className="text-[15px] font-semibold text-white leading-none mb-0.5">Ask Your Money Coach</h1>
-            <p className="text-[12px]" style={{ color: "var(--uw-faint)" }}>Straight talk, no jargon</p>
+            <h1 className="text-[32px] md:text-[40px] leading-[1.08] font-normal tracking-[-0.035em] text-[var(--uw-ink)] mb-2">Money coach</h1>
+            <p className="text-[16px]" style={{ color: "var(--uw-muted)" }}>Answers use your own balance, bills and payday.</p>
           </div>
           <div
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
-            style={aiDown ? { background: "var(--uw-surface)", border: "1px solid var(--uw-line)" } : { background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.15)" }}
+            style={aiDown ? { background: "var(--uw-surface)", border: "1px solid var(--uw-line)" } : { background: "var(--uw-green-bg)", border: "1px solid var(--uw-green-line)" }}
             title={aiDown ? "The AI coach is unavailable, so replies come from built-in rules." : undefined}
           >
-            <div className={`w-1.5 h-1.5 rounded-full ${aiDown ? "" : "animate-pulse"}`} style={{ background: aiDown ? "#555" : "#22c55e" }} />
-            <span className="text-[11px] font-medium shrink-0" style={{ color: aiDown ? "#888" : "#22c55e" }}>{aiDown ? "Basic replies" : "Online"}</span>
+            <div className={`w-1.5 h-1.5 rounded-full ${aiDown ? "" : "animate-pulse"}`} style={{ background: aiDown ? "var(--uw-faint)" : "var(--uw-green)" }} />
+            <span className="text-[13px] font-medium shrink-0" style={{ color: aiDown ? "var(--uw-muted)" : "var(--uw-green)" }}>{aiDown ? "Basic replies" : "Online"}</span>
           </div>
         </div>
 
@@ -189,25 +188,12 @@ export default function CoachPage() {
           className="flex items-center gap-2.5 px-4 md:px-8 py-3 shrink-0 overflow-x-auto"
           style={{ borderBottom: "1px solid var(--uw-line)" }}
         >
-          <span className="text-[11px] shrink-0" style={{ color: "var(--uw-faint)" }}>Try:</span>
+          <span className="text-[13px] shrink-0" style={{ color: "var(--uw-muted)" }}>Try</span>
           {SUGGESTED_PROMPTS.map((prompt) => (
             <button
               key={prompt}
               onClick={() => send(prompt)}
-              className="shrink-0 px-3.5 py-1.5 rounded-full text-[12px] font-medium transition-all duration-100"
-              style={{
-                background: "rgb(37 111 130 / 0.08)",
-                color: "var(--uw-accent-text)",
-                border: "1px solid rgb(37 111 130 / 0.2)",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgb(37 111 130 / 0.15)";
-                e.currentTarget.style.borderColor = "rgb(37 111 130 / 0.4)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "rgb(37 111 130 / 0.08)";
-                e.currentTarget.style.borderColor = "rgb(37 111 130 / 0.2)";
-              }}
+              className="shrink-0 h-9 px-4 rounded-full text-[14px] font-medium bg-[var(--uw-surface)] text-[var(--uw-ink)] border border-[var(--uw-line)] transition-[transform,border-color] duration-150 hover:-translate-y-px hover:border-[var(--uw-accent)]"
             >
               {prompt}
             </button>
@@ -215,7 +201,7 @@ export default function CoachPage() {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 space-y-4">
+        <div className="flex-1 overflow-y-auto px-5 md:px-10 py-4 md:py-6 space-y-4">
           {[greeting, ...messages].map((msg) => (
             <div
               key={msg.id}
@@ -225,7 +211,7 @@ export default function CoachPage() {
                 <CoachAvatar />
               )}
               <div
-                className="max-w-lg rounded-2xl px-4 py-3"
+                className="max-w-lg rounded-[20px] px-4 py-3"
                 style={
                   msg.role === "user"
                     ? { background: "var(--uw-accent)", color: "#fff", borderBottomRightRadius: 4 }
@@ -242,7 +228,7 @@ export default function CoachPage() {
             <div className="flex justify-start">
               <CoachAvatar />
               <div
-                className="rounded-2xl px-4 py-3 flex items-center gap-1"
+                className="rounded-[20px] px-4 py-3 flex items-center gap-1"
                 style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)", borderBottomLeftRadius: 4 }}
               >
                 {[0, 1, 2].map((i) => (
@@ -273,7 +259,7 @@ export default function CoachPage() {
                 background: "var(--uw-surface)",
                 border: "1px solid var(--uw-line)",
                 color: "var(--uw-ink)",
-                colorScheme: "dark",
+                colorScheme: "light",
               }}
               onFocus={(e) => (e.currentTarget.style.borderColor = "var(--uw-line)")}
               onBlur={(e) => (e.currentTarget.style.borderColor = "var(--uw-line)")}
@@ -281,7 +267,7 @@ export default function CoachPage() {
             <button
               type="submit"
               disabled={!input.trim() || typing}
-              className="px-5 py-3 rounded-xl text-[13px] font-semibold transition-all duration-100 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="px-5 py-3 rounded-xl text-[13px] font-medium transition-all duration-100 disabled:opacity-30 disabled:cursor-not-allowed"
               style={{ background: "var(--uw-accent)", color: "#fff" }}
               onMouseEnter={(e) => {
                 if (!e.currentTarget.disabled) e.currentTarget.style.background = "var(--uw-accent-hover)";

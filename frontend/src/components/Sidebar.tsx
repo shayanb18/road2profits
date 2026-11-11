@@ -10,6 +10,12 @@ import {
   TrophyIcon,
 } from "@heroicons/react/24/outline";
 import { clearUserId } from "@/lib/api";
+import { BTN_SECONDARY } from "@/components/ui";
+
+// -1234.5 -> "-$1,234.50"
+export function money(n: number) {
+  return `${n < 0 ? "-" : ""}$${Math.abs(n).toLocaleString("en-CA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
 
 export const NAV = [
   { label: "Dashboard", href: "/dashboard", Icon: Squares2X2Icon },
@@ -41,18 +47,7 @@ export function StartOver() {
         clearUserId();
         router.push("/onboarding");
       }}
-      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-medium transition-all duration-100"
-      style={{ background: "transparent", color: "var(--uw-faint)", border: "1px solid var(--uw-line)" }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.color = "#ef4444";
-        e.currentTarget.style.borderColor = "rgba(239,68,68,0.3)";
-        e.currentTarget.style.background = "rgba(239,68,68,0.06)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.color = "var(--uw-faint)";
-        e.currentTarget.style.borderColor = "var(--uw-line)";
-        e.currentTarget.style.background = "transparent";
-      }}
+      className={`${BTN_SECONDARY} w-full hover:border-[var(--uw-red)] hover:text-[var(--uw-red)]`}
     >
       Start over
     </button>
@@ -65,52 +60,37 @@ export function Sidebar({ balance }: { balance?: number }) {
 
   return (
     <>
-      <aside
-        className="hidden md:flex flex-col shrink-0 py-8"
-        style={{ width: 240, background: "var(--uw-bg)", borderRight: "1px solid var(--uw-line)" }}
-      >
-        {/* Brand */}
-        <div className="px-6 mb-8">
-          <div className="flex items-center gap-2 mb-1.5">
-            <Logo />
-            <p className="text-[15px] font-bold text-white tracking-tight">UniWallet</p>
-          </div>
+      <aside className="hidden md:flex p-4 shrink-0">
+        <div className="flex flex-col w-60 rounded-[20px] px-5 py-7" style={{ background: "var(--uw-lit)", color: "var(--uw-lit-ink)" }}>
+          <Link href="/dashboard" className="flex items-center gap-2.5 text-[20px] font-medium tracking-[-0.02em] px-2 mb-2">
+            <Logo size={20} />
+            UniWallet
+          </Link>
           {balance !== undefined && (
-            <p className="text-[12px]" style={{ color: "var(--uw-faint)" }}>
-              Balance:{" "}
-              <span className="font-medium" style={{ color: "var(--uw-muted)" }}>
-                ${balance.toLocaleString("en-CA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
+            <p className="text-[14px] px-2 mb-10 text-[var(--uw-lit-muted)]">
+              Balance <span className="font-medium tabular-nums text-[var(--uw-lit-ink)]">{money(balance)}</span>
             </p>
           )}
-        </div>
 
-        {/* Nav */}
-        <nav className="flex-1 px-3 space-y-0.5">
-          {NAV.map(({ label, href, Icon }) => {
-            const active = pathname === href;
-            return (
-              <Link
-                key={href}
-                href={href}
-                aria-current={active ? "page" : undefined}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-100"
-                style={{
-                  background: active ? "rgb(37 111 130 / 0.1)" : "transparent",
-                  color: active ? "var(--uw-accent-text)" : "var(--uw-muted)",
-                  borderLeft: active ? "2px solid var(--uw-accent)" : "2px solid transparent",
-                  textDecoration: "none",
-                }}
-              >
-                <Icon aria-hidden className="w-4 h-4 shrink-0" />
-                <span className="text-[13px] font-medium">{label}</span>
-              </Link>
-            );
-          })}
-        </nav>
+          <nav className="flex-1 space-y-1">
+            {NAV.map(({ label, href, Icon }) => {
+              const active = pathname === href;
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  aria-current={active ? "page" : undefined}
+                  className={`flex items-center gap-3 h-11 px-3 rounded-xl text-[16px] transition-colors ${
+                    active ? "bg-white font-medium text-[var(--uw-ink)] shadow-[0_8px_20px_-14px_rgb(0_0_0/0.45)]" : "text-[var(--uw-lit-ink)] hover:bg-white/50"
+                  }`}
+                >
+                  <Icon aria-hidden className={`w-5 h-5 shrink-0 ${active ? "text-[var(--uw-accent)]" : ""}`} />
+                  {label}
+                </Link>
+              );
+            })}
+          </nav>
 
-        {/* Reset */}
-        <div className="px-4 pt-6" style={{ borderTop: "1px solid var(--uw-line)" }}>
           <StartOver />
         </div>
       </aside>
@@ -130,7 +110,7 @@ export function Sidebar({ balance }: { balance?: number }) {
               style={{ color: active ? "var(--uw-accent-text)" : "var(--uw-muted)", textDecoration: "none" }}
             >
               <Icon aria-hidden className="w-5 h-5" />
-              <span className="text-[10px] font-medium">{label}</span>
+              <span className="text-[12px] font-medium">{label}</span>
             </Link>
           );
         })}

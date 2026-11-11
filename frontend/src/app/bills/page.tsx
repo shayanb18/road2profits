@@ -5,12 +5,10 @@ import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Loading } from "@/components/Loading";
 import { useProfile } from "@/hooks/useProfile";
+import { CheckIcon } from "@heroicons/react/24/outline";
+import { CARD, CHIP, LABEL, BTN_SECONDARY, chipStyle, PRIORITY_TONE } from "@/components/ui";
 
-const PRIORITY_CFG = {
-  high: { border: "#ef4444", bg: "rgba(239,68,68,0.06)", dot: "#ef4444", label: "High" },
-  medium: { border: "#eab308", bg: "rgba(234,179,8,0.06)", dot: "#eab308", label: "Medium" },
-  low: { border: "var(--uw-line)", bg: "rgba(55,65,81,0.04)", dot: "var(--uw-muted)", label: "Low" },
-};
+const PRIORITY_LABEL = { high: "High", medium: "Medium", low: "Low" } as const;
 
 
 export default function BillsPage() {
@@ -39,167 +37,96 @@ export default function BillsPage() {
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         {/* Top bar */}
         <div
-          className="flex items-center justify-between gap-4 px-4 md:px-8 py-4 shrink-0"
-          style={{ borderBottom: "1px solid var(--uw-line)" }}
+          className="flex items-end justify-between gap-4 px-5 md:px-10 pt-8 md:pt-10 pb-4 shrink-0"
         >
           <div>
-            <h1 className="text-[15px] font-semibold text-white leading-none mb-0.5">Your Bills</h1>
-            <p className="text-[12px]" style={{ color: "var(--uw-faint)" }}>
+            <h1 className="text-[32px] md:text-[40px] leading-[1.08] font-normal tracking-[-0.035em] text-[var(--uw-ink)] mb-2">Your bills</h1>
+            <p className="text-[16px]" style={{ color: "var(--uw-muted)" }}>
               {unpaid.length} unpaid · {paid.length} paid
             </p>
           </div>
           {/* Total owed */}
           <div className="text-right">
-            <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "var(--uw-faint)" }}>
+            <p className="text-[13px] mb-1 font-medium" style={{ color: "var(--uw-faint)" }}>
               Total owed
             </p>
-            <p className="text-xl font-bold tabular-nums" style={{ color: totalOwed > 0 ? "#ef4444" : "#22c55e" }}>
+            <p className="text-xl font-medium tabular-nums" style={{ color: totalOwed > 0 ? "var(--uw-red)" : "var(--uw-green)" }}>
               ${totalOwed.toFixed(2)}
             </p>
           </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6">
+        <div className="flex-1 overflow-y-auto px-5 md:px-10 py-4 md:py-6">
           {bills.length === 0 ? (
-            <div
-              className="rounded-2xl py-16 text-center"
-              style={{ border: "1px dashed var(--uw-line)" }}
-            >
-              <p className="text-[14px]" style={{ color: "var(--uw-faint)" }}>No bills yet.</p>
-              <p className="text-[12px] mt-1" style={{ color: "var(--uw-faint)" }}>
+            <div className="rounded-[20px] py-16 text-center border border-dashed border-[var(--uw-line)]">
+              <p className="text-[16px] text-[var(--uw-ink)]">No bills yet.</p>
+              <p className="text-[14px] mt-1 text-[var(--uw-muted)]">
                 Bills you add during setup show up here.
               </p>
             </div>
           ) : (
             <div className="space-y-6">
               {saveError && (
-                <p role="alert" className="text-[13px]" style={{ color: "#ef4444" }}>{saveError}</p>
+                <p role="alert" className="rounded-lg px-4 py-3 text-[14px] bg-[var(--uw-red-bg)] text-[var(--uw-red)]">{saveError}</p>
               )}
               {/* Unpaid bills */}
               {unpaid.length > 0 && (
-                <div className="space-y-3">
+                <ul className={`${CARD} overflow-hidden`}>
                   {unpaid.map((bill) => {
-                    const pc = PRIORITY_CFG[bill.priority];
                     const days = daysUntil(bill.dueDate, new Date(now));
                     const urgent = days >= 0 && days <= 3;
                     return (
-                      <div
-                        key={bill.id}
-                        className="rounded-2xl px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
-                        style={{
-                          background: pc.bg,
-                          border: `1px solid ${pc.border}30`,
-                          borderLeft: `3px solid ${pc.border}`,
-                        }}
-                      >
-                        {/* Left info */}
-                        <div className="flex items-center gap-4">
-                          <div>
-                            <div className="flex flex-wrap items-center gap-2.5 mb-1">
-                              <p className="text-[15px] font-semibold text-white">{bill.name}</p>
-                              <span
-                                className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-medium"
-                                style={{
-                                  background: `${pc.dot}18`,
-                                  color: pc.dot,
-                                  border: `1px solid ${pc.dot}30`,
-                                }}
-                              >
-                                {pc.label}
-                              </span>
-                              {urgent && (
-                                <span
-                                  className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-medium"
-                                  style={{
-                                    background: "rgba(239,68,68,0.12)",
-                                    color: "#ef4444",
-                                    border: "1px solid rgba(239,68,68,0.2)",
-                                  }}
-                                >
-                                  {days === 0 ? "Due today" : days === 1 ? "Due tomorrow" : `${days}d left`}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-[12px]" style={{ color: "var(--uw-faint)" }}>
-                              Due{" "}
-                              {formatDay(bill.dueDate, {
-                                month: "long",
-                                day: "numeric",
-                              })}
-                              {!urgent && ` · ${days > 0 ? `${days} days away` : "overdue"}`}
-                            </p>
-                          </div>
+                      <li key={bill.id} className="grid grid-cols-[40px_minmax(0,1fr)_auto] sm:flex items-center gap-x-4 gap-y-3 px-5 md:px-6 py-4 border-b border-[var(--uw-line)] last:border-b-0">
+                        <span className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 text-[15px] font-medium" style={{ background: "var(--uw-lit)", color: "var(--uw-lit-ink)" }}>
+                          {bill.name.charAt(0).toUpperCase()}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[16px] font-medium text-[var(--uw-ink)] truncate">{bill.name}</p>
+                          <p className="text-[14px] text-[var(--uw-muted)]">
+                            Due {formatDay(bill.dueDate, { month: "long", day: "numeric" })}
+                            {!urgent && ` · ${days > 0 ? `${days} days away` : "overdue"}`}
+                          </p>
                         </div>
-
-                        {/* Right: amount + toggle */}
-                        <div className="flex items-center justify-between sm:justify-end gap-5">
-                          <p className="text-2xl font-bold tabular-nums text-white">${bill.amount}</p>
-                          <button
-                            onClick={() => togglePaid(bill.id, true)}
-                            className="px-4 py-2 rounded-xl text-[12px] font-medium transition-all duration-100"
-                            style={{
-                              background: "rgba(255,255,255,0.05)",
-                              color: "var(--uw-muted)",
-                              border: "1px solid var(--uw-line)",
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.background = "rgba(34,197,94,0.1)";
-                              e.currentTarget.style.color = "#22c55e";
-                              e.currentTarget.style.borderColor = "rgba(34,197,94,0.3)";
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-                              e.currentTarget.style.color = "var(--uw-muted)";
-                              e.currentTarget.style.borderColor = "var(--uw-line)";
-                            }}
-                          >
-                            Mark paid
-                          </button>
+                        <div className="col-start-2 row-start-2 flex flex-wrap items-center gap-2">
+                          {urgent && (
+                            <span className={CHIP} style={chipStyle("red")}>
+                              {days === 0 ? "Due today" : days === 1 ? "Due tomorrow" : `${days} days left`}
+                            </span>
+                          )}
+                          <span className={CHIP} style={chipStyle(PRIORITY_TONE[bill.priority])}>
+                            <span aria-hidden className="w-1.5 h-1.5 rounded-full bg-current" />
+                            {PRIORITY_LABEL[bill.priority]}
+                          </span>
                         </div>
-                      </div>
+                        <p className="col-start-3 row-start-1 text-[20px] font-medium tabular-nums text-[var(--uw-ink)] sm:w-24 text-right">${bill.amount}</p>
+                        <button onClick={() => togglePaid(bill.id, true)} className={`${BTN_SECONDARY} col-start-3 row-start-2 h-9 px-4 text-[14px] hover:border-[var(--uw-green)] hover:text-[var(--uw-green)]`}>
+                          Mark paid
+                        </button>
+                      </li>
                     );
                   })}
-                </div>
+                </ul>
               )}
 
               {/* Paid bills */}
               {paid.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="flex-1 h-px" style={{ background: "var(--uw-raised)" }} />
-                    <span className="text-[11px] uppercase tracking-widest" style={{ color: "var(--uw-faint)" }}>Paid</span>
-                    <div className="flex-1 h-px" style={{ background: "var(--uw-raised)" }} />
-                  </div>
-                  <div className="space-y-2">
+                  <h2 className={`${LABEL} mb-3`}>Paid</h2>
+                  <ul className={`${CARD} overflow-hidden`}>
                     {paid.map((bill) => (
-                      <div
-                        key={bill.id}
-                        className="rounded-2xl px-5 py-3.5 flex items-center justify-between"
-                        style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)", opacity: 0.5 }}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-[14px] line-through" style={{ color: "var(--uw-faint)" }}>
-                            {bill.name}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <span className="text-[14px] line-through tabular-nums" style={{ color: "var(--uw-faint)" }}>
-                            ${bill.amount}
-                          </span>
-                          <button
-                            onClick={() => togglePaid(bill.id, false)}
-                            className="text-[11px] px-3 py-1.5 rounded-lg transition-colors"
-                            style={{ color: "var(--uw-faint)", border: "1px solid var(--uw-line)" }}
-                            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--uw-muted)")}
-                            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--uw-faint)")}
-                          >
-                            Undo
-                          </button>
-                        </div>
-                      </div>
+                      <li key={bill.id} className="flex items-center gap-4 px-5 md:px-6 py-3.5 border-b border-[var(--uw-line)] last:border-b-0">
+                        <span className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-[var(--uw-green-bg)] text-[var(--uw-green)]">
+                          <CheckIcon aria-hidden className="w-4 h-4" strokeWidth={2.5} />
+                        </span>
+                        <span className="flex-1 min-w-0 truncate text-[16px] text-[var(--uw-muted)] line-through">{bill.name}</span>
+                        <span className="text-[16px] tabular-nums text-[var(--uw-muted)] line-through">${bill.amount}</span>
+                        <button onClick={() => togglePaid(bill.id, false)} className={`${BTN_SECONDARY} h-9 px-4 text-[14px]`}>
+                          Undo
+                        </button>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </div>
               )}
             </div>

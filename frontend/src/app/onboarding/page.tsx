@@ -6,7 +6,17 @@ import { useRouter } from "next/navigation";
 import { StudentType, PayFrequency, Bill, BillPriority } from "@/types";
 import { api, setUserId } from "@/lib/api";
 import { Logo } from "@/components/Sidebar";
-import { HomeIcon, BuildingLibraryIcon, BuildingOffice2Icon, XMarkIcon, CheckIcon } from "@heroicons/react/24/outline";
+import { FIELD, BTN_PRIMARY, BTN_SECONDARY, CARD } from "@/components/ui";
+import {
+  HomeIcon,
+  BuildingLibraryIcon,
+  BuildingOffice2Icon,
+  XMarkIcon,
+  CheckIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  PlusIcon,
+} from "@heroicons/react/24/outline";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -32,40 +42,32 @@ const studentOptions: {
   title: string;
   description: string;
 }[] = [
-  {
-    value: "living_at_home",
-    Icon: HomeIcon,
-    title: "Living at Home",
-    description: "Staying with family, lower overhead costs",
-  },
-  {
-    value: "dorm",
-    Icon: BuildingLibraryIcon,
-    title: "Student Dorm",
-    description: "On-campus housing, meals included",
-  },
-  {
-    value: "off_campus",
-    Icon: BuildingOffice2Icon,
-    title: "Off Campus",
-    description: "Renting your own place, full expenses",
-  },
+  { value: "living_at_home", Icon: HomeIcon, title: "Living at home", description: "With family, so fewer costs of your own." },
+  { value: "dorm", Icon: BuildingLibraryIcon, title: "Student residence", description: "On campus, often with a meal plan." },
+  { value: "off_campus", Icon: BuildingOffice2Icon, title: "Off campus", description: "Your own place: rent, utilities and food." },
 ];
 
-const priorityOptions: { value: BillPriority; label: string; color: string }[] = [
-  { value: "high", label: "High", color: "#ef4444" },
-  { value: "medium", label: "Medium", color: "#eab308" },
-  { value: "low", label: "Low", color: "var(--uw-muted)" },
-];
+// The landing page's status chips: red, amber, neutral.
+const priorityStyle: Record<BillPriority, { label: string; bg: string; fg: string }> = {
+  high: { label: "High", bg: "#fbe6e3", fg: "#a3271b" },
+  medium: { label: "Medium", bg: "#fdf0dc", fg: "#8a5300" },
+  low: { label: "Low", bg: "#ebe8e3", fg: "#55514c" },
+};
+
+const stepLabels = ["Living situation", "Your money", "Bills", "Review"];
+
+// -1234.5 -> "-$1,234.50"; whole numbers keep no cents.
+function money(n: number) {
+  const s = Math.abs(n).toLocaleString("en-CA", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+  return `${n < 0 ? "-" : ""}$${s}`;
+}
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function FieldLabel({ children }: { children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label
-      className="block text-[11px] uppercase tracking-[0.16em] font-medium mb-2"
-      style={{ color: "var(--uw-faint)" }}
-    >
+    <label className="block">
+      <span className="block text-[13px] font-medium mb-2 text-[var(--uw-muted)]">{label}</span>
       {children}
     </label>
   );
@@ -87,10 +89,7 @@ function StyledInput({
   return (
     <div className="relative">
       {prefix && (
-        <span
-          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-medium select-none"
-          style={{ color: "var(--uw-faint)" }}
-        >
+        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[16px] select-none text-[var(--uw-faint)]">
           {prefix}
         </span>
       )}
@@ -99,16 +98,7 @@ function StyledInput({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg text-sm outline-none transition-colors"
-        style={{
-          background: "var(--uw-surface)",
-          border: "1px solid var(--uw-line)",
-          color: "var(--uw-ink)",
-          padding: prefix ? "10px 14px 10px 28px" : "10px 14px",
-          colorScheme: "dark",
-        }}
-        onFocus={(e) => (e.currentTarget.style.borderColor = "var(--uw-line)")}
-        onBlur={(e) => (e.currentTarget.style.borderColor = "var(--uw-line)")}
+        className={`${FIELD} ${prefix ? "pl-8 pr-4" : "px-4"}`}
       />
     </div>
   );
@@ -124,71 +114,65 @@ function StyledSelect({
   options: { value: string; label: string }[];
 }) {
   return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="w-full rounded-lg text-sm outline-none transition-colors appearance-none cursor-pointer"
-      style={{
-        background: "var(--uw-surface)",
-        border: "1px solid var(--uw-line)",
-        color: "var(--uw-ink)",
-        padding: "10px 14px",
-        colorScheme: "dark",
-      }}
-    >
-      {options.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
-    </select>
+    <div className="relative">
+      <select value={value} onChange={(e) => onChange(e.target.value)} className={`${FIELD} px-4 appearance-none cursor-pointer`}>
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      <svg aria-hidden viewBox="0 0 12 12" className="absolute right-4 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none text-[var(--uw-muted)]">
+        <path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </div>
+  );
+}
+
+function StepHead({ title, lead }: { title: string; lead: string }) {
+  return (
+    <div className="mb-10">
+      <h1 className="text-[32px] md:text-[44px] leading-[1.08] font-normal tracking-[-0.035em] text-[var(--uw-ink)] mb-3">
+        {title}
+      </h1>
+      <p className="text-[16px] md:text-[18px] leading-relaxed text-[var(--uw-muted)] max-w-xl">{lead}</p>
+    </div>
   );
 }
 
 // ─── Steps ────────────────────────────────────────────────────────────────────
 
-function Step1({
-  data,
-  onChange,
-}: {
-  data: OnboardingData;
-  onChange: (v: StudentType) => void;
-}) {
+function Step1({ data, onChange }: { data: OnboardingData; onChange: (v: StudentType) => void }) {
   return (
     <div>
-      <h2 className="text-2xl font-semibold text-white mb-2">How are you living?</h2>
-      <p className="text-sm text-[var(--uw-muted)] mb-8">
-        This helps us calibrate your financial baseline.
-      </p>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <StepHead title="Where do you live this term?" lead="It sets which costs UniWallet expects, like rent or a meal plan." />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" role="radiogroup" aria-label="Living situation">
         {studentOptions.map((opt) => {
           const active = data.studentType === opt.value;
           return (
             <button
               key={opt.value}
+              role="radio"
+              aria-checked={active}
               onClick={() => onChange(opt.value)}
-              className="text-left rounded-xl p-5 transition-all duration-150"
-              style={{
-                background: active ? "rgba(255,255,255,0.06)" : "var(--uw-surface)",
-                border: active ? "1px solid var(--uw-line)" : "1px solid var(--uw-line)",
-                boxShadow: active ? "0 0 0 1px var(--uw-line)" : "none",
-              }}
+              className={`${CARD} relative text-left p-3 flex items-center gap-4 sm:block transition-[transform,border-color,box-shadow] duration-150 hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uw-accent)] ${
+                active ? "border-[var(--uw-accent)] shadow-[0_0_0_1px_var(--uw-accent)]" : "hover:border-[var(--uw-muted)]"
+              }`}
             >
-              <div
-                className="mb-4 w-10 h-10 rounded-lg flex items-center justify-center"
-                style={{ background: active ? "var(--uw-raised)" : "var(--uw-surface)", color: active ? "var(--uw-accent-text)" : "var(--uw-muted)" }}
-              >
-                <opt.Icon aria-hidden className="w-5 h-5" />
+              <div className="w-20 h-20 shrink-0 sm:w-auto sm:h-28 rounded-xl flex items-center justify-center sm:mb-4" style={{ background: "var(--uw-lit)" }}>
+                <span className="w-12 h-12 rounded-xl bg-white flex items-center justify-center shadow-[0_8px_20px_-12px_rgb(0_0_0/0.4)]">
+                  <opt.Icon aria-hidden className="w-6 h-6" style={{ color: active ? "var(--uw-accent)" : "var(--uw-lit-ink)" }} />
+                </span>
               </div>
-              <p
-                className="text-[14px] font-semibold mb-1.5"
-                style={{ color: active ? "#fff" : "#aaa" }}
-              >
-                {opt.title}
-              </p>
-              <p className="text-[12px] leading-snug" style={{ color: "var(--uw-faint)" }}>
-                {opt.description}
-              </p>
+              <div className="pr-8 sm:px-2 sm:pb-2">
+                <p className="text-[18px] font-medium text-[var(--uw-ink)] mb-1">{opt.title}</p>
+                <p className="text-[14px] leading-snug text-[var(--uw-muted)]">{opt.description}</p>
+              </div>
+              {active && (
+                <span className="absolute top-5 right-5 w-6 h-6 rounded-full bg-[var(--uw-accent)] text-white flex items-center justify-center">
+                  <CheckIcon aria-hidden className="w-3.5 h-3.5" strokeWidth={2.5} />
+                </span>
+              )}
             </button>
           );
         })}
@@ -197,73 +181,42 @@ function Step1({
   );
 }
 
-function Step2({
-  data,
-  onField,
-}: {
-  data: OnboardingData;
-  onField: (k: keyof OnboardingData, v: string) => void;
-}) {
+function Step2({ data, onField }: { data: OnboardingData; onField: (k: keyof OnboardingData, v: string) => void }) {
   return (
     <div>
-      <h2 className="text-2xl font-semibold text-white mb-2">Your money situation</h2>
-      <p className="text-sm text-[var(--uw-muted)] mb-8">
-        We&apos;ll use this to project your balance before your next payday.
-      </p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <StepHead title="Your money right now" lead="Your balance and pay schedule set the forecast to your next payday." />
+      <div className={`${CARD} p-6 md:p-8 grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-6`}>
         <div className="sm:col-span-2">
-          <FieldLabel>Your Name</FieldLabel>
-          <StyledInput placeholder="e.g. Priya" value={data.name} onChange={(v) => onField("name", v)} />
+          <Field label="Your name">
+            <StyledInput placeholder="Priya" value={data.name} onChange={(v) => onField("name", v)} />
+          </Field>
         </div>
-        <div>
-          <FieldLabel>School</FieldLabel>
-          <StyledInput placeholder="e.g. Wilfrid Laurier University" value={data.school} onChange={(v) => onField("school", v)} />
-        </div>
-        <div>
-          <FieldLabel>City</FieldLabel>
-          <StyledInput placeholder="e.g. Waterloo" value={data.city} onChange={(v) => onField("city", v)} />
-        </div>
-        <div>
-          <FieldLabel>Current Balance</FieldLabel>
-          <StyledInput
-            prefix="$"
-            type="number"
-            placeholder="0.00"
-            value={data.currentBalance}
-            onChange={(v) => onField("currentBalance", v)}
-          />
-        </div>
-        <div>
-          <FieldLabel>Monthly Income</FieldLabel>
-          <StyledInput
-            prefix="$"
-            type="number"
-            placeholder="0.00"
-            value={data.monthlyIncome}
-            onChange={(v) => onField("monthlyIncome", v)}
-          />
-        </div>
-        <div>
-          <FieldLabel>Pay Frequency</FieldLabel>
+        <Field label="School">
+          <StyledInput placeholder="Wilfrid Laurier University" value={data.school} onChange={(v) => onField("school", v)} />
+        </Field>
+        <Field label="City">
+          <StyledInput placeholder="Waterloo" value={data.city} onChange={(v) => onField("city", v)} />
+        </Field>
+        <Field label="Current balance">
+          <StyledInput prefix="$" type="number" placeholder="0.00" value={data.currentBalance} onChange={(v) => onField("currentBalance", v)} />
+        </Field>
+        <Field label="Monthly income">
+          <StyledInput prefix="$" type="number" placeholder="0.00" value={data.monthlyIncome} onChange={(v) => onField("monthlyIncome", v)} />
+        </Field>
+        <Field label="Pay frequency">
           <StyledSelect
             value={data.payFrequency}
             onChange={(v) => onField("payFrequency", v)}
             options={[
               { value: "weekly", label: "Weekly" },
-              { value: "biweekly", label: "Biweekly" },
+              { value: "biweekly", label: "Every two weeks" },
               { value: "monthly", label: "Monthly" },
             ]}
           />
-        </div>
-        <div>
-          <FieldLabel>Next Pay Date</FieldLabel>
-          <StyledInput
-            type="date"
-            placeholder=""
-            value={data.nextPayDate}
-            onChange={(v) => onField("nextPayDate", v)}
-          />
-        </div>
+        </Field>
+        <Field label="Next pay date">
+          <StyledInput type="date" value={data.nextPayDate} onChange={(v) => onField("nextPayDate", v)} />
+        </Field>
       </div>
     </div>
   );
@@ -306,173 +259,104 @@ function Step3({
     setPriority("medium");
   }
 
-  const priorityColor: Record<BillPriority, string> = {
-    high: "#ef4444",
-    medium: "#eab308",
-    low: "var(--uw-muted)",
-  };
+  const total = data.bills.reduce((s, b) => s + b.amount, 0);
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold text-white mb-2">What do you owe?</h2>
-      <p className="text-sm text-[var(--uw-muted)] mb-8">
-        Add recurring bills: rent, utilities, subscriptions. You can skip this for now.
-      </p>
+      <StepHead title="Bills you pay" lead="Rent, phone, subscriptions: anything that repeats. You can skip this and add bills later." />
 
-      {/* Add bill form */}
-      <div
-        className="rounded-xl p-5 mb-5"
-        style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)" }}
-      >
-        <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--uw-faint)] mb-4">
-          New Bill
-        </p>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+      <div className={`${CARD} p-6 md:p-8 mb-4`}>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-5 gap-y-6 mb-6">
           <div className="col-span-2">
-            <FieldLabel>Bill Name</FieldLabel>
-            <StyledInput
-              placeholder="e.g. Rent"
-              value={name}
-              onChange={setName}
-            />
+            <Field label="Bill name">
+              <StyledInput placeholder="Rent" value={name} onChange={setName} />
+            </Field>
           </div>
-          <div>
-            <FieldLabel>Amount</FieldLabel>
-            <StyledInput
-              prefix="$"
-              type="number"
-              placeholder="0"
-              value={amount}
-              onChange={setAmount}
-            />
-          </div>
-          <div>
-            <FieldLabel>Due Date</FieldLabel>
-            <StyledInput
-              type="date"
-              placeholder=""
-              value={dueDate}
-              onChange={setDueDate}
-            />
-          </div>
+          <Field label="Amount">
+            <StyledInput prefix="$" type="number" placeholder="0" value={amount} onChange={setAmount} />
+          </Field>
+          <Field label="Due date">
+            <StyledInput type="date" value={dueDate} onChange={setDueDate} />
+          </Field>
         </div>
 
-        {/* Priority selector */}
-        <div className="flex flex-wrap items-center gap-3 mb-4">
-          <span className="text-[11px] uppercase tracking-[0.16em] text-[var(--uw-faint)]">
-            Priority
-          </span>
-          <div className="flex gap-2">
-            {priorityOptions.map((p) => (
-              <button
-                key={p.value}
-                onClick={() => setPriority(p.value)}
-                className="px-3 py-1 rounded-md text-[12px] font-medium transition-all"
-                style={{
-                  background: priority === p.value ? `${p.color}18` : "var(--uw-surface)",
-                  color: priority === p.value ? p.color : "var(--uw-faint)",
-                  border: priority === p.value ? `1px solid ${p.color}35` : "1px solid var(--uw-line)",
-                }}
-              >
-                {p.label}
-              </button>
-            ))}
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <span className="block text-[13px] font-medium mb-2 text-[var(--uw-muted)]">Priority</span>
+            <div role="radiogroup" aria-label="Priority" className="inline-flex p-1 rounded-lg bg-[var(--uw-raised)] gap-1">
+              {(Object.keys(priorityStyle) as BillPriority[]).map((p) => {
+                const on = priority === p;
+                return (
+                  <button
+                    key={p}
+                    role="radio"
+                    aria-checked={on}
+                    onClick={() => setPriority(p)}
+                    className={`h-9 px-4 rounded-md text-[14px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-[var(--uw-accent)] ${
+                      on ? "bg-white text-[var(--uw-ink)] shadow-[0_1px_2px_rgb(0_0_0/0.12)]" : "text-[var(--uw-muted)] hover:text-[var(--uw-ink)]"
+                    }`}
+                  >
+                    {priorityStyle[p].label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
+          <button onClick={handleAdd} className={BTN_SECONDARY}>
+            <PlusIcon aria-hidden className="w-4 h-4" strokeWidth={2} />
+            Add bill
+          </button>
         </div>
 
         {error && (
-          <p className="text-[12px] mb-3" style={{ color: "#ef4444" }}>
+          <p role="alert" className="text-[14px] mt-4" style={{ color: "#a3271b" }}>
             {error}
           </p>
         )}
-
-        <button
-          onClick={handleAdd}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-medium transition-all"
-          style={{
-            background: "rgba(255,255,255,0.05)",
-            color: "var(--uw-ink)",
-            border: "1px solid var(--uw-line)",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(255,255,255,0.08)";
-            e.currentTarget.style.color = "#fff";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-            e.currentTarget.style.color = "var(--uw-ink)";
-          }}
-        >
-          <span style={{ fontSize: 16, lineHeight: 1 }}>+</span> Add Bill
-        </button>
       </div>
 
-      {/* Bills list */}
       {data.bills.length > 0 ? (
-        <div
-          className="rounded-xl overflow-hidden"
-          style={{ border: "1px solid var(--uw-line)" }}
-        >
-          {data.bills.map((bill, i) => (
-            <div
-              key={bill.id}
-              className="flex flex-wrap items-center justify-between gap-x-5 gap-y-2 px-5 py-3.5"
-              style={{
-                background: i % 2 === 0 ? "var(--uw-bg)" : "var(--uw-bg)",
-                borderBottom:
-                  i < data.bills.length - 1 ? "1px solid var(--uw-line)" : "none",
-              }}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-1.5 h-1.5 rounded-full shrink-0"
-                  style={{ background: priorityColor[bill.priority] }}
-                />
-                <span className="text-[13px] font-medium text-[var(--uw-ink)]">
-                  {bill.name}
-                </span>
-                <span
-                  className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded"
-                  style={{
-                    background: `${priorityColor[bill.priority]}14`,
-                    color: priorityColor[bill.priority],
-                    border: `1px solid ${priorityColor[bill.priority]}25`,
-                  }}
-                >
-                  {bill.priority}
-                </span>
-              </div>
-              <div className="flex items-center gap-5">
-                <span className="text-[12px] text-[var(--uw-muted)]">
-                  Due{" "}
-                  {formatDay(bill.dueDate, {
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </span>
-                <span className="text-[13px] font-semibold text-[var(--uw-ink)] tabular-nums">
-                  ${bill.amount}
-                </span>
-                <button
-                  onClick={() => onRemoveBill(bill.id)}
-                  aria-label={`Remove ${bill.name}`}
-                  className="transition-colors"
-                  style={{ color: "var(--uw-faint)" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#ef4444")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "var(--uw-faint)")}
-                >
-                  <XMarkIcon aria-hidden className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))}
+        <div className={`${CARD} overflow-hidden`}>
+          <ul>
+            {data.bills.map((bill) => {
+              const ps = priorityStyle[bill.priority];
+              return (
+                <li key={bill.id} className="flex items-center gap-4 px-6 py-4 border-b border-[var(--uw-line)] last:border-b-0">
+                  <span className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-[14px] font-medium" style={{ background: "var(--uw-lit)", color: "var(--uw-lit-ink)" }}>
+                    {bill.name.charAt(0).toUpperCase()}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[16px] font-medium text-[var(--uw-ink)] truncate first-letter:uppercase">{bill.name}</p>
+                    <p className="text-[14px] text-[var(--uw-muted)]">
+                      Due {formatDay(bill.dueDate, { month: "short", day: "numeric" })}
+                    </p>
+                  </div>
+                  <span className="hidden sm:inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full text-[13px] font-medium" style={{ background: ps.bg, color: ps.fg }}>
+                    <span className="w-1.5 h-1.5 rounded-full bg-current" aria-hidden />
+                    {ps.label}
+                  </span>
+                  <span className="text-[16px] font-medium tabular-nums text-[var(--uw-ink)] w-24 text-right">{money(bill.amount)}</span>
+                  <button
+                    onClick={() => onRemoveBill(bill.id)}
+                    aria-label={`Remove ${bill.name}`}
+                    className="w-9 h-9 -mr-2 rounded-lg flex items-center justify-center text-[var(--uw-muted)] transition-colors hover:bg-[#fbe6e3] hover:text-[#a3271b]"
+                  >
+                    <XMarkIcon aria-hidden className="w-4 h-4" />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="flex justify-between px-6 py-4 bg-[var(--uw-raised)] text-[14px]">
+            <span className="text-[var(--uw-muted)]">
+              {data.bills.length} bill{data.bills.length !== 1 ? "s" : ""}
+            </span>
+            <span className="font-medium tabular-nums text-[var(--uw-ink)]">{money(total)} total</span>
+          </div>
         </div>
       ) : (
-        <div
-          className="rounded-xl py-10 text-center"
-          style={{ border: "1px dashed var(--uw-line)" }}
-        >
-          <p className="text-[13px] text-[var(--uw-faint)]">No bills added yet. That&apos;s fine.</p>
+        <div className="rounded-[20px] border border-dashed border-[var(--uw-line)] py-10 text-center">
+          <p className="text-[16px] text-[var(--uw-muted)]">No bills yet. Add one above, or continue without.</p>
         </div>
       )}
     </div>
@@ -488,79 +372,42 @@ function Step4({ data }: { data: OnboardingData }) {
     { label: "School", value: data.school.trim() || "—" },
     { label: "City", value: data.city.trim() || "—" },
     { label: "Living situation", value: studentLabel?.title ?? "—" },
-    { label: "Current balance", value: data.currentBalance ? `$${Number(data.currentBalance).toLocaleString()}` : "—" },
-    { label: "Monthly income", value: data.monthlyIncome ? `$${Number(data.monthlyIncome).toLocaleString()}` : "—" },
+    { label: "Current balance", value: data.currentBalance ? money(Number(data.currentBalance)) : "—" },
+    { label: "Monthly income", value: data.monthlyIncome ? money(Number(data.monthlyIncome)) : "—" },
     {
       label: "Pay frequency",
-      value:
-        data.payFrequency === "biweekly"
-          ? "Biweekly"
-          : data.payFrequency === "weekly"
-          ? "Weekly"
-          : "Monthly",
+      value: data.payFrequency === "biweekly" ? "Every two weeks" : data.payFrequency === "weekly" ? "Weekly" : "Monthly",
     },
     {
       label: "Next pay date",
-      value: data.nextPayDate
-        ? formatDay(data.nextPayDate, {
-            month: "long",
-            day: "numeric",
-            year: "numeric",
-          })
-        : "—",
+      value: data.nextPayDate ? formatDay(data.nextPayDate, { month: "long", day: "numeric", year: "numeric" }) : "—",
     },
     {
-      label: "Bills added",
-      value: `${data.bills.length} bill${data.bills.length !== 1 ? "s" : ""}${
-        totalBills > 0 ? ` · $${totalBills} total` : ""
-      }`,
+      label: "Bills",
+      value: `${data.bills.length} bill${data.bills.length !== 1 ? "s" : ""}${totalBills > 0 ? `, ${money(totalBills)} total` : ""}`,
     },
   ];
 
   return (
     <div>
-      <div className="mb-2">
-        <span className="text-[11px] uppercase tracking-[0.2em] font-medium" style={{ color: "var(--uw-accent-text)" }}>
-          All set
-        </span>
-      </div>
-      <h2 className="text-2xl font-semibold text-white mb-2">Here&apos;s what we&apos;ve got</h2>
-      <p className="text-sm text-[var(--uw-muted)] mb-8">
-        Check your details before you continue.
-      </p>
+      <StepHead title="Check your details" lead="Go back to change anything. Your forecast is ready on the next screen." />
 
-      <div
-        className="rounded-xl overflow-hidden mb-8"
-        style={{ border: "1px solid var(--uw-line)" }}
-      >
-        {rows.map((row, i) => (
-          <div
-            key={row.label}
-            className="flex items-center justify-between gap-4 px-5 py-4"
-            style={{
-              background: i % 2 === 0 ? "var(--uw-bg)" : "var(--uw-bg)",
-              borderBottom: i < rows.length - 1 ? "1px solid var(--uw-line)" : "none",
-            }}
-          >
-            <span className="text-[12px] uppercase tracking-[0.14em] font-medium" style={{ color: "var(--uw-faint)" }}>
-              {row.label}
-            </span>
-            <span className="text-[13px] font-medium text-[var(--uw-ink)]">{row.value}</span>
+      <dl className={`${CARD} overflow-hidden mb-4`}>
+        {rows.map((row) => (
+          <div key={row.label} className="flex items-center justify-between gap-4 px-6 py-4 border-b border-[var(--uw-line)] last:border-b-0">
+            <dt className="text-[14px] text-[var(--uw-muted)]">{row.label}</dt>
+            <dd className="text-[16px] font-medium text-[var(--uw-ink)] text-right">{row.value}</dd>
           </div>
         ))}
-      </div>
+      </dl>
 
       {data.bills.length > 0 && (
-        <div
-          className="rounded-xl p-4 flex items-start gap-3"
-          style={{
-            background: "rgba(34,197,94,0.05)",
-            border: "1px solid #1a3326",
-          }}
-        >
-          <CheckIcon aria-hidden className="w-4 h-4 shrink-0 mt-0.5" style={{ color: "#22c55e" }} />
-          <p className="text-[13px]" style={{ color: "#2d7a4f" }}>
-            Your bills are prioritized. We&apos;ll tell you which ones to pay first based on your balance.
+        <div className="rounded-[20px] p-5 flex items-start gap-3" style={{ background: "var(--uw-lit)", color: "var(--uw-lit-ink)" }}>
+          <span className="w-6 h-6 rounded-full bg-[var(--uw-accent)] text-white flex items-center justify-center shrink-0">
+            <CheckIcon aria-hidden className="w-3.5 h-3.5" strokeWidth={2.5} />
+          </span>
+          <p className="text-[16px] leading-relaxed">
+            Your bills will be sorted by due date, then priority, so the dashboard shows which to pay first.
           </p>
         </div>
       )}
@@ -658,192 +505,93 @@ export default function OnboardingPage() {
 
   const progress = (step / TOTAL_STEPS) * 100;
 
-  const stepLabels = ["Student Type", "Finances", "Bills", "Review"];
-
   return (
-    <div
-      className="flex h-dvh overflow-hidden font-sans"
-      style={{ background: "var(--uw-bg)", color: "var(--uw-ink)" }}
-    >
-      {/* ── Left panel ── */}
-      <div
-        className="hidden md:flex flex-col w-72 shrink-0 px-8 py-10"
-        style={{ background: "var(--uw-bg)", borderRight: "1px solid var(--uw-line)" }}
-      >
-        {/* Brand */}
-        <div className="mb-12">
-          <a href="/" className="flex items-center gap-2 mb-1 text-[15px] font-semibold" style={{ color: "var(--uw-ink)" }}>
-            <Logo />
+    <div className="flex h-dvh overflow-hidden font-sans bg-[var(--uw-bg)] text-[var(--uw-ink)]">
+      {/* ── Left: the steps on the landing page's lit panel ── */}
+      <aside className="hidden md:flex p-4 shrink-0">
+        <div className="flex flex-col w-72 rounded-[20px] px-6 py-8" style={{ background: "var(--uw-lit)", color: "var(--uw-lit-ink)" }}>
+          <a href="/" className="flex items-center gap-2.5 text-[20px] font-medium tracking-[-0.02em] mb-12">
+            <Logo size={20} />
             UniWallet
           </a>
-          <p className="text-[13px]" style={{ color: "var(--uw-muted)" }}>Setup</p>
-        </div>
 
-        {/* Step list */}
-        <div className="flex-1 space-y-1">
-          {stepLabels.map((label, i) => {
-            const n = i + 1;
-            const done = n < step;
-            const active = n === step;
-            return (
-              <div
-                key={label}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg"
-                style={{
-                  background: active ? "rgba(255,255,255,0.05)" : "transparent",
-                }}
-              >
-                <div
-                  className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[10px] font-semibold"
-                  style={{
-                    background: done ? "var(--uw-accent-hover)" : active ? "var(--uw-raised)" : "var(--uw-surface)",
-                    color: done ? "#fff" : active ? "#fff" : "#333",
-                    border: done
-                      ? "none"
-                      : active
-                      ? "1px solid var(--uw-line)"
-                      : "1px solid var(--uw-line)",
-                  }}
-                >
-                  {done ? <CheckIcon aria-hidden className="w-3 h-3" /> : n}
-                </div>
-                <span
-                  className="text-[13px] font-medium"
-                  style={{ color: done ? "#60a5fa" : active ? "#fff" : "#333" }}
-                >
-                  {label}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Bottom note */}
-        <p className="text-[11px] leading-relaxed" style={{ color: "var(--uw-faint)" }}>
-          Your details are saved to UniWallet so the coach can use your real numbers.
-        </p>
-      </div>
-
-      {/* ── Right panel ── */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Progress bar */}
-        <div
-          className="relative h-0.5 w-full shrink-0"
-          style={{ background: "var(--uw-surface)" }}
-        >
-          <div
-            className="absolute inset-y-0 left-0 transition-all duration-500 ease-out"
-            style={{
-              width: `${progress}%`,
-              background: "var(--uw-accent)",
-            }}
-          />
-        </div>
-
-        {/* Header */}
-        <div
-          className="flex items-center justify-between px-4 md:px-12 py-5 shrink-0"
-          style={{ borderBottom: "1px solid var(--uw-line)" }}
-        >
-          <div className="hidden sm:flex items-center gap-2">
+          <ol className="flex-1 space-y-1" aria-label="Setup steps">
             {stepLabels.map((label, i) => {
               const n = i + 1;
               const done = n < step;
               const active = n === step;
               return (
-                <div key={label} className="flex items-center gap-2">
-                  {i > 0 && (
-                    <div
-                      className="w-6 h-px"
-                      style={{ background: done ? "var(--uw-accent)" : "var(--uw-raised)" }}
-                    />
-                  )}
+                <li
+                  key={label}
+                  aria-current={active ? "step" : undefined}
+                  className={`flex items-center gap-3 h-12 px-3 rounded-xl transition-colors ${active ? "bg-white shadow-[0_8px_20px_-14px_rgb(0_0_0/0.45)]" : ""}`}
+                >
                   <span
-                    className="text-[12px] font-medium"
-                    style={{
-                      color: active ? "var(--uw-ink)" : done ? "var(--uw-accent-text)" : "var(--uw-faint)",
-                    }}
+                    className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[13px] font-medium ${
+                      done ? "bg-[var(--uw-accent)] text-white" : active ? "bg-[var(--uw-ink)] text-white" : "border border-[var(--uw-lit-muted)] text-[var(--uw-lit-muted)]"
+                    }`}
                   >
-                    {label}
+                    {done ? <CheckIcon aria-hidden className="w-3.5 h-3.5" strokeWidth={2.5} /> : n}
                   </span>
-                </div>
+                  <span className={`text-[16px] ${active ? "font-medium text-[var(--uw-ink)]" : "text-[var(--uw-lit-ink)]"}`}>{label}</span>
+                </li>
               );
             })}
+          </ol>
+
+          <p className="text-[14px] leading-relaxed text-[var(--uw-lit-muted)]">
+            Saved to UniWallet so the coach can answer with your real numbers. No account or password.
+          </p>
+        </div>
+      </aside>
+
+      {/* ── Right: the step ── */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <header className="flex items-center gap-6 px-5 md:px-12 pt-6 md:pt-8 shrink-0">
+          <a href="/" className="md:hidden flex items-center gap-2 text-[18px] font-medium tracking-[-0.02em]">
+            <Logo size={18} />
+            UniWallet
+          </a>
+          <div className="flex-1 h-1 rounded-full bg-[var(--uw-raised)] overflow-hidden" role="progressbar" aria-valuenow={step} aria-valuemin={1} aria-valuemax={TOTAL_STEPS} aria-label="Setup progress">
+            <div className="h-full rounded-full bg-[var(--uw-accent)] transition-[width] duration-500 ease-out" style={{ width: `${progress}%` }} />
           </div>
-          <span className="text-[11px] tabular-nums ml-auto" style={{ color: "var(--uw-faint)" }}>
+          <span className="text-[13px] font-medium tabular-nums text-[var(--uw-muted)] shrink-0">
             Step {step} of {TOTAL_STEPS}
           </span>
-        </div>
+        </header>
 
-        {/* Step content */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto px-4 md:px-12 py-8 md:py-12">
-            {step === 1 && (
-              <Step1
-                data={data}
-                onChange={(v) => setData((d) => ({ ...d, studentType: v }))}
-              />
-            )}
+        <main className="flex-1 overflow-y-auto">
+          <div className="max-w-3xl mx-auto px-5 md:px-12 py-10 md:py-16">
+            {step === 1 && <Step1 data={data} onChange={(v) => setData((d) => ({ ...d, studentType: v }))} />}
             {step === 2 && <Step2 data={data} onField={setField} />}
-            {step === 3 && (
-              <Step3 data={data} onAddBill={addBill} onRemoveBill={removeBill} />
-            )}
+            {step === 3 && <Step3 data={data} onAddBill={addBill} onRemoveBill={removeBill} />}
             {step === 4 && <Step4 data={data} />}
           </div>
-        </div>
+        </main>
 
-        {/* Footer nav */}
-        <div
-          className="flex flex-wrap items-center justify-between gap-3 px-4 md:px-12 py-5 shrink-0"
-          style={{ borderTop: "1px solid var(--uw-line)" }}
-        >
-          {saveError && (
-            <p role="alert" className="basis-full text-[12px]" style={{ color: "#ef4444" }}>{saveError}</p>
-          )}
-          <button
-            onClick={() => setStep((s) => s - 1)}
-            disabled={step === 1}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-[13px] font-medium transition-all disabled:opacity-0 disabled:pointer-events-none"
-            style={{
-              background: "transparent",
-              color: "var(--uw-faint)",
-              border: "1px solid var(--uw-line)",
-            }}
-            onMouseEnter={(e) => {
-              if (step > 1) {
-                e.currentTarget.style.color = "#fff";
-                e.currentTarget.style.borderColor = "var(--uw-line)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "var(--uw-faint)";
-              e.currentTarget.style.borderColor = "var(--uw-line)";
-            }}
-          >
-            ← Back
-          </button>
-
-          <button
-            onClick={handleNext}
-            disabled={!canProceed() || saving}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-lg text-[13px] font-semibold transition-all disabled:cursor-not-allowed"
-            style={{
-              background: canProceed()
-                ? step === TOTAL_STEPS
-                  ? "var(--uw-accent)"
-                  : "#fff"
-                : "var(--uw-raised)",
-              color: canProceed()
-                ? step === TOTAL_STEPS
-                  ? "#fff"
-                  : "var(--uw-bg)"
-                : "var(--uw-muted)",
-              border: canProceed() ? "1px solid transparent" : "1px solid var(--uw-line)",
-            }}
-          >
-            {saving ? "Saving..." : step === TOTAL_STEPS ? "See My Dashboard →" : "Continue →"}
-          </button>
-        </div>
+        <footer className="shrink-0 border-t border-[var(--uw-line)] px-5 md:px-12 py-5">
+          <div className="max-w-3xl mx-auto">
+            {saveError && (
+              <p role="alert" className="mb-4 rounded-lg px-4 py-3 text-[14px]" style={{ background: "#fbe6e3", color: "#a3271b" }}>
+                {saveError}
+              </p>
+            )}
+            <div className="flex items-center justify-between gap-3">
+              <button
+                onClick={() => setStep((s) => s - 1)}
+                disabled={step === 1}
+                className={`${BTN_SECONDARY} disabled:invisible`}
+              >
+                <ArrowLeftIcon aria-hidden className="w-4 h-4" strokeWidth={2} />
+                Back
+              </button>
+              <button onClick={handleNext} disabled={!canProceed() || saving} className={BTN_PRIMARY}>
+                {saving ? "Saving…" : step === TOTAL_STEPS ? "See my dashboard" : "Continue"}
+                {!saving && <ArrowRightIcon aria-hidden className="w-4 h-4" strokeWidth={2} />}
+              </button>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );

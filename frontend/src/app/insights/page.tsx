@@ -3,26 +3,27 @@
 import { useMemo } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Loading } from "@/components/Loading";
+import { CARD } from "@/components/ui";
 import { useProfile } from "@/hooks/useProfile";
 import { computeForecast } from "@/lib/forecast";
 import { ExclamationTriangleIcon, ExclamationCircleIcon, LightBulbIcon } from "@heroicons/react/24/outline";
 
 const CARD_CFG = {
   danger: {
-    border: "#ef4444",
-    bg: "rgba(239,68,68,0.07)",
+    border: "var(--uw-red)",
+    bg: "var(--uw-red-bg)",
     Icon: ExclamationTriangleIcon,
-    color: "#ef4444",
+    color: "var(--uw-red)",
     label: "Urgent",
-    labelBg: "rgba(239,68,68,0.1)",
+    labelBg: "var(--uw-red-bg)",
   },
   warning: {
-    border: "#eab308",
-    bg: "rgba(234,179,8,0.07)",
+    border: "var(--uw-amber)",
+    bg: "var(--uw-amber-bg)",
     Icon: ExclamationCircleIcon,
-    color: "#eab308",
+    color: "var(--uw-amber)",
     label: "Heads Up",
-    labelBg: "rgba(234,179,8,0.1)",
+    labelBg: "var(--uw-amber-bg)",
   },
   tip: {
     border: "var(--uw-accent)",
@@ -70,18 +71,17 @@ export default function InsightsPage() {
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         {/* Top bar */}
         <div
-          className="flex items-center justify-between gap-4 px-4 md:px-8 py-4 shrink-0"
-          style={{ borderBottom: "1px solid var(--uw-line)" }}
+          className="flex items-end justify-between gap-4 px-5 md:px-10 pt-8 md:pt-10 pb-4 shrink-0"
         >
           <div>
-            <h1 className="text-[15px] font-semibold text-white leading-none mb-0.5">What&apos;s Going On</h1>
-            <p className="text-[12px]" style={{ color: "var(--uw-faint)" }}>
+            <h1 className="text-[32px] md:text-[40px] leading-[1.08] font-normal tracking-[-0.035em] text-[var(--uw-ink)] mb-2">Where your money goes</h1>
+            <p className="text-[16px]" style={{ color: "var(--uw-muted)" }}>
               {forecast.insights.length} insight{forecast.insights.length !== 1 ? "s" : ""} about your finances
             </p>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 space-y-6">
+        <div className="flex-1 overflow-y-auto px-5 md:px-10 py-4 md:py-6 space-y-6">
 
           {/* Insight cards */}
           {forecast.insights.length > 0 ? (
@@ -91,23 +91,18 @@ export default function InsightsPage() {
                 return (
                   <div
                     key={insight.id}
-                    className="rounded-2xl px-5 py-5"
-                    style={{
-                      background: cfg.bg,
-                      border: `1px solid ${cfg.border}20`,
-                      borderLeft: `3px solid ${cfg.border}`,
-                    }}
+                    className={`${CARD} px-6 py-5`}
                   >
                     <div className="flex items-center gap-2 mb-3">
                       <cfg.Icon aria-hidden className="w-4 h-4" style={{ color: cfg.color }} />
                       <span
-                        className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold"
+                        className="text-[13px] px-2 py-0.5 rounded-full font-medium"
                         style={{ background: cfg.labelBg, color: cfg.color }}
                       >
                         {cfg.label}
                       </span>
                     </div>
-                    <p className="text-[14px] leading-relaxed" style={{ color: "var(--uw-ink)" }}>
+                    <p className="text-[16px] leading-relaxed" style={{ color: "var(--uw-ink)" }}>
                       {insight.message}
                     </p>
                   </div>
@@ -116,16 +111,16 @@ export default function InsightsPage() {
             </div>
           ) : (
             <div
-              className="rounded-2xl py-12 text-center"
+              className="rounded-[20px] py-12 text-center"
               style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)" }}
             >
-              <p className="text-[13px]" style={{ color: "var(--uw-faint)" }}>No alerts. Your finances look fine.</p>
+              <p className="text-[16px] text-[var(--uw-muted)]">No alerts. Your finances look fine.</p>
             </div>
           )}
 
           {/* Breakdown bar */}
-          <div className="rounded-2xl px-6 py-5" style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)" }}>
-            <p className="text-[11px] uppercase tracking-[0.16em] font-medium mb-5" style={{ color: "var(--uw-muted)" }}>
+          <div className="rounded-[20px] px-6 py-5" style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)" }}>
+            <p className="text-[16px] font-medium mb-5 text-[var(--uw-ink)]">
               Where your money is going
             </p>
 
@@ -136,12 +131,12 @@ export default function InsightsPage() {
                   className="transition-all duration-700"
                   style={{
                     width: `${committedPct}%`,
-                    background: committedPct > 80 ? "#ef4444" : committedPct > 60 ? "#eab308" : "var(--uw-accent)",
+                    background: committedPct > 80 ? "var(--uw-red)" : committedPct > 60 ? "var(--uw-amber)" : "var(--uw-accent)",
                   }}
                 />
                 <div
                   className="transition-all duration-700"
-                  style={{ width: `${safePct}%`, background: "#22c55e" }}
+                  style={{ width: `${safePct}%`, background: "var(--uw-green)" }}
                 />
               </div>
             </div>
@@ -149,18 +144,18 @@ export default function InsightsPage() {
             {/* Legend */}
             <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: committedPct > 80 ? "#ef4444" : committedPct > 60 ? "#eab308" : "var(--uw-accent)" }} />
+                <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: committedPct > 80 ? "var(--uw-red)" : committedPct > 60 ? "var(--uw-amber)" : "var(--uw-accent)" }} />
                 <div>
-                  <p className="text-[13px] font-semibold text-white tabular-nums">${totalBills.toFixed(2)}</p>
+                  <p className="text-[13px] font-medium text-[var(--uw-ink)] tabular-nums">${totalBills.toFixed(2)}</p>
                   <p className="text-[11px]" style={{ color: "var(--uw-faint)" }}>
                     Committed to bills ({Math.round(committedPct)}%)
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2.5">
-                <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: "#22c55e" }} />
+                <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: "var(--uw-green)" }} />
                 <div>
-                  <p className="text-[13px] font-semibold text-white tabular-nums">${safeToSpend.toFixed(2)}</p>
+                  <p className="text-[13px] font-medium text-[var(--uw-ink)] tabular-nums">${safeToSpend.toFixed(2)}</p>
                   <p className="text-[11px]" style={{ color: "var(--uw-faint)" }}>
                     Safe to spend ({Math.round(safePct)}%)
                   </p>
@@ -171,18 +166,18 @@ export default function InsightsPage() {
 
           {/* Largest bill callout */}
           {largestBill && (
-            <div className="rounded-2xl px-6 py-5" style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)" }}>
-              <p className="text-[11px] uppercase tracking-[0.16em] font-medium mb-4" style={{ color: "var(--uw-muted)" }}>
+            <div className="rounded-[20px] px-6 py-5" style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)" }}>
+              <p className="text-[13px] font-medium mb-4" style={{ color: "var(--uw-muted)" }}>
                 Biggest expense
               </p>
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <p className="text-[15px] font-semibold text-white">{largestBill.name}</p>
+                  <p className="text-[15px] font-medium text-[var(--uw-ink)]">{largestBill.name}</p>
                   <p className="text-[12px] mt-0.5" style={{ color: "var(--uw-faint)" }}>
                     Your {largestBill.name.toLowerCase()} takes up {largestBillPct}% of what you have
                   </p>
                 </div>
-                <p className="text-2xl font-bold tabular-nums text-white">${largestBill.amount}</p>
+                <p className="text-2xl font-medium tabular-nums text-[var(--uw-ink)]">${largestBill.amount}</p>
               </div>
               {/* mini bar */}
               <div className="rounded-full overflow-hidden" style={{ height: 4, background: "var(--uw-raised)" }}>
@@ -190,7 +185,7 @@ export default function InsightsPage() {
                   className="h-full rounded-full"
                   style={{
                     width: `${Math.min(100, largestBillPct)}%`,
-                    background: largestBillPct > 50 ? "#ef4444" : "#eab308",
+                    background: largestBillPct > 50 ? "var(--uw-red)" : "var(--uw-amber)",
                   }}
                 />
               </div>
@@ -199,9 +194,9 @@ export default function InsightsPage() {
 
           {/* Bills breakdown */}
           {unpaidBills.length > 0 && (
-            <div className="rounded-2xl overflow-hidden" style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)" }}>
+            <div className="rounded-[20px] overflow-hidden" style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)" }}>
               <div className="px-6 py-4" style={{ borderBottom: "1px solid var(--uw-line)" }}>
-                <p className="text-[11px] uppercase tracking-[0.16em] font-medium" style={{ color: "var(--uw-muted)" }}>
+                <p className="text-[13px] font-medium" style={{ color: "var(--uw-muted)" }}>
                   Bill breakdown
                 </p>
               </div>
@@ -218,7 +213,7 @@ export default function InsightsPage() {
                           <span className="text-[13px] font-medium" style={{ color: "var(--uw-ink)" }}>{bill.name}</span>
                           <div className="flex items-center gap-3">
                             <span className="text-[12px]" style={{ color: "var(--uw-faint)" }}>{Math.round(pct)}%</span>
-                            <span className="text-[13px] font-semibold tabular-nums text-white">${bill.amount}</span>
+                            <span className="text-[13px] font-medium tabular-nums text-[var(--uw-ink)]">${bill.amount}</span>
                           </div>
                         </div>
                         <div className="rounded-full overflow-hidden" style={{ height: 3, background: "var(--uw-raised)" }}>
@@ -226,7 +221,7 @@ export default function InsightsPage() {
                             className="h-full rounded-full"
                             style={{
                               width: `${pct}%`,
-                              background: pct > 50 ? "#ef4444" : pct > 30 ? "#eab308" : "var(--uw-accent)",
+                              background: pct > 50 ? "var(--uw-red)" : pct > 30 ? "var(--uw-amber)" : "var(--uw-accent)",
                             }}
                           />
                         </div>
