@@ -9,7 +9,7 @@ import { useProfile } from "@/hooks/useProfile";
 const PRIORITY_CFG = {
   high: { border: "#ef4444", bg: "rgba(239,68,68,0.06)", dot: "#ef4444", label: "High" },
   medium: { border: "#eab308", bg: "rgba(234,179,8,0.06)", dot: "#eab308", label: "Medium" },
-  low: { border: "#374151", bg: "rgba(55,65,81,0.04)", dot: "#6b7280", label: "Low" },
+  low: { border: "var(--uw-line)", bg: "rgba(55,65,81,0.04)", dot: "var(--uw-muted)", label: "Low" },
 };
 
 
@@ -33,24 +33,24 @@ export default function BillsPage() {
   const totalOwed = unpaid.reduce((s, b) => s + b.amount, 0);
 
   return (
-    <div className="flex flex-col md:flex-row h-dvh overflow-hidden font-sans" style={{ background: "#0a0a0a", color: "#f0f0f0" }}>
+    <div className="flex flex-col md:flex-row h-dvh overflow-hidden font-sans" style={{ background: "var(--uw-bg)", color: "var(--uw-ink)" }}>
       <Sidebar balance={profile?.currentBalance} />
 
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         {/* Top bar */}
         <div
           className="flex items-center justify-between gap-4 px-4 md:px-8 py-4 shrink-0"
-          style={{ borderBottom: "1px solid #1a1a1a" }}
+          style={{ borderBottom: "1px solid var(--uw-line)" }}
         >
           <div>
             <h1 className="text-[15px] font-semibold text-white leading-none mb-0.5">Your Bills</h1>
-            <p className="text-[12px]" style={{ color: "#555" }}>
+            <p className="text-[12px]" style={{ color: "var(--uw-faint)" }}>
               {unpaid.length} unpaid · {paid.length} paid
             </p>
           </div>
           {/* Total owed */}
           <div className="text-right">
-            <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "#555" }}>
+            <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "var(--uw-faint)" }}>
               Total owed
             </p>
             <p className="text-xl font-bold tabular-nums" style={{ color: totalOwed > 0 ? "#ef4444" : "#22c55e" }}>
@@ -64,10 +64,10 @@ export default function BillsPage() {
           {bills.length === 0 ? (
             <div
               className="rounded-2xl py-16 text-center"
-              style={{ border: "1px dashed #222" }}
+              style={{ border: "1px dashed var(--uw-line)" }}
             >
-              <p className="text-[14px]" style={{ color: "#555" }}>No bills yet.</p>
-              <p className="text-[12px] mt-1" style={{ color: "#333" }}>
+              <p className="text-[14px]" style={{ color: "var(--uw-faint)" }}>No bills yet.</p>
+              <p className="text-[12px] mt-1" style={{ color: "var(--uw-faint)" }}>
                 Bills you add during setup show up here.
               </p>
             </div>
@@ -121,7 +121,7 @@ export default function BillsPage() {
                                 </span>
                               )}
                             </div>
-                            <p className="text-[12px]" style={{ color: "#555" }}>
+                            <p className="text-[12px]" style={{ color: "var(--uw-faint)" }}>
                               Due{" "}
                               {formatDay(bill.dueDate, {
                                 month: "long",
@@ -140,8 +140,8 @@ export default function BillsPage() {
                             className="px-4 py-2 rounded-xl text-[12px] font-medium transition-all duration-100"
                             style={{
                               background: "rgba(255,255,255,0.05)",
-                              color: "#666",
-                              border: "1px solid #2a2a2a",
+                              color: "var(--uw-muted)",
+                              border: "1px solid var(--uw-line)",
                             }}
                             onMouseEnter={(e) => {
                               e.currentTarget.style.background = "rgba(34,197,94,0.1)";
@@ -150,8 +150,8 @@ export default function BillsPage() {
                             }}
                             onMouseLeave={(e) => {
                               e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-                              e.currentTarget.style.color = "#666";
-                              e.currentTarget.style.borderColor = "#2a2a2a";
+                              e.currentTarget.style.color = "var(--uw-muted)";
+                              e.currentTarget.style.borderColor = "var(--uw-line)";
                             }}
                           >
                             Mark paid
@@ -167,32 +167,32 @@ export default function BillsPage() {
               {paid.length > 0 && (
                 <div>
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="flex-1 h-px" style={{ background: "#1a1a1a" }} />
-                    <span className="text-[11px] uppercase tracking-widest" style={{ color: "#333" }}>Paid</span>
-                    <div className="flex-1 h-px" style={{ background: "#1a1a1a" }} />
+                    <div className="flex-1 h-px" style={{ background: "var(--uw-raised)" }} />
+                    <span className="text-[11px] uppercase tracking-widest" style={{ color: "var(--uw-faint)" }}>Paid</span>
+                    <div className="flex-1 h-px" style={{ background: "var(--uw-raised)" }} />
                   </div>
                   <div className="space-y-2">
                     {paid.map((bill) => (
                       <div
                         key={bill.id}
                         className="rounded-2xl px-5 py-3.5 flex items-center justify-between"
-                        style={{ background: "#0e0e0e", border: "1px solid #1a1a1a", opacity: 0.5 }}
+                        style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)", opacity: 0.5 }}
                       >
                         <div className="flex items-center gap-3">
-                          <span className="text-[14px] line-through" style={{ color: "#555" }}>
+                          <span className="text-[14px] line-through" style={{ color: "var(--uw-faint)" }}>
                             {bill.name}
                           </span>
                         </div>
                         <div className="flex items-center gap-4">
-                          <span className="text-[14px] line-through tabular-nums" style={{ color: "#444" }}>
+                          <span className="text-[14px] line-through tabular-nums" style={{ color: "var(--uw-faint)" }}>
                             ${bill.amount}
                           </span>
                           <button
                             onClick={() => togglePaid(bill.id, false)}
                             className="text-[11px] px-3 py-1.5 rounded-lg transition-colors"
-                            style={{ color: "#333", border: "1px solid #1e1e1e" }}
-                            onMouseEnter={(e) => (e.currentTarget.style.color = "#888")}
-                            onMouseLeave={(e) => (e.currentTarget.style.color = "#333")}
+                            style={{ color: "var(--uw-faint)", border: "1px solid var(--uw-line)" }}
+                            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--uw-muted)")}
+                            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--uw-faint)")}
                           >
                             Undo
                           </button>

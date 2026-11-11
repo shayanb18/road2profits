@@ -8,7 +8,6 @@ import {
   ChartPieIcon,
   ChatBubbleLeftRightIcon,
   TrophyIcon,
-  WalletIcon,
 } from "@heroicons/react/24/outline";
 import { clearUserId } from "@/lib/api";
 
@@ -20,8 +19,17 @@ export const NAV = [
   { label: "Challenge", href: "/challenge", Icon: TrophyIcon },
 ];
 
+// The initial tile, the same mark as the landing page's nav.
 export function Logo({ size = 18 }: { size?: number }) {
-  return <WalletIcon aria-hidden style={{ width: size, height: size, color: "#3b82f6" }} />;
+  return (
+    <span
+      aria-hidden
+      className="inline-flex items-center justify-center font-semibold leading-none"
+      style={{ width: size + 4, height: size + 4, borderRadius: 6, background: "var(--uw-accent)", color: "#fff", fontSize: size * 0.7 }}
+    >
+      U
+    </span>
+  );
 }
 
 // Forgets this browser's user and goes back to onboarding. Lives in the sidebar on desktop and on the dashboard on phones.
@@ -34,15 +42,15 @@ export function StartOver() {
         router.push("/onboarding");
       }}
       className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-medium transition-all duration-100"
-      style={{ background: "transparent", color: "#555", border: "1px solid #1e1e1e" }}
+      style={{ background: "transparent", color: "var(--uw-faint)", border: "1px solid var(--uw-line)" }}
       onMouseEnter={(e) => {
         e.currentTarget.style.color = "#ef4444";
         e.currentTarget.style.borderColor = "rgba(239,68,68,0.3)";
         e.currentTarget.style.background = "rgba(239,68,68,0.06)";
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.color = "#555";
-        e.currentTarget.style.borderColor = "#1e1e1e";
+        e.currentTarget.style.color = "var(--uw-faint)";
+        e.currentTarget.style.borderColor = "var(--uw-line)";
         e.currentTarget.style.background = "transparent";
       }}
     >
@@ -59,7 +67,7 @@ export function Sidebar({ balance }: { balance?: number }) {
     <>
       <aside
         className="hidden md:flex flex-col shrink-0 py-8"
-        style={{ width: 240, background: "#0d0d0d", borderRight: "1px solid #1e1e1e" }}
+        style={{ width: 240, background: "var(--uw-bg)", borderRight: "1px solid var(--uw-line)" }}
       >
         {/* Brand */}
         <div className="px-6 mb-8">
@@ -68,9 +76,9 @@ export function Sidebar({ balance }: { balance?: number }) {
             <p className="text-[15px] font-bold text-white tracking-tight">UniWallet</p>
           </div>
           {balance !== undefined && (
-            <p className="text-[12px]" style={{ color: "#555" }}>
+            <p className="text-[12px]" style={{ color: "var(--uw-faint)" }}>
               Balance:{" "}
-              <span className="font-medium" style={{ color: "#888" }}>
+              <span className="font-medium" style={{ color: "var(--uw-muted)" }}>
                 ${balance.toLocaleString("en-CA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </p>
@@ -88,9 +96,9 @@ export function Sidebar({ balance }: { balance?: number }) {
                 aria-current={active ? "page" : undefined}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-100"
                 style={{
-                  background: active ? "rgba(59,130,246,0.1)" : "transparent",
-                  color: active ? "#3b82f6" : "#4a4a4a",
-                  borderLeft: active ? "2px solid #3b82f6" : "2px solid transparent",
+                  background: active ? "rgb(37 111 130 / 0.1)" : "transparent",
+                  color: active ? "var(--uw-accent-text)" : "var(--uw-muted)",
+                  borderLeft: active ? "2px solid var(--uw-accent)" : "2px solid transparent",
                   textDecoration: "none",
                 }}
               >
@@ -102,14 +110,14 @@ export function Sidebar({ balance }: { balance?: number }) {
         </nav>
 
         {/* Reset */}
-        <div className="px-4 pt-6" style={{ borderTop: "1px solid #181818" }}>
+        <div className="px-4 pt-6" style={{ borderTop: "1px solid var(--uw-line)" }}>
           <StartOver />
         </div>
       </aside>
 
       <nav
         className="md:hidden order-last shrink-0 flex justify-around pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
-        style={{ background: "#0d0d0d", borderTop: "1px solid #1e1e1e" }}
+        style={{ background: "var(--uw-bg)", borderTop: "1px solid var(--uw-line)" }}
       >
         {NAV.map(({ label, href, Icon }) => {
           const active = pathname === href;
@@ -119,7 +127,7 @@ export function Sidebar({ balance }: { balance?: number }) {
               href={href}
               aria-current={active ? "page" : undefined}
               className="flex flex-col items-center gap-1 px-2 py-1 min-w-14"
-              style={{ color: active ? "#3b82f6" : "#555", textDecoration: "none" }}
+              style={{ color: active ? "var(--uw-accent-text)" : "var(--uw-muted)", textDecoration: "none" }}
             >
               <Icon aria-hidden className="w-5 h-5" />
               <span className="text-[10px] font-medium">{label}</span>

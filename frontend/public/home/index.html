@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en" data-type="software" data-radius="soft" data-ground="sky" data-buttons="solid" data-motion>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>UniWallet: budget forecaster for students</title>
+<meta name="description" content="UniWallet is a budget forecaster for university students: it shows what you will have left before payday and which bills to pay first.">
+<meta name="site-kind" content="software">
+<meta name="page-type" content="software">
+<link rel="icon" href="/favicon.ico">
+<!-- Someone who already set up UniWallet in this browser goes straight to their dashboard. -->
+<script>try { if (localStorage.getItem("uniwallet_user_id")) location.replace("/dashboard"); } catch (e) {}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400..700&family=JetBrains+Mono:wght@400..500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/home/assets/system.css">
+<link rel="stylesheet" href="/home/assets/ui/cards.css">
+<link rel="stylesheet" href="/home/assets/motion/motion.css">
+<link rel="stylesheet" href="/home/assets/backgrounds/backgrounds.css">
+<link rel="stylesheet" href="/home/assets/layout/layout.css">
+<link rel="stylesheet" href="/home/assets/icons/icon.css">
+<style>
+:root {
+  --p-bg: #dedad3; --p-surface: #d3cec6; --p-ink: #0a0a0a; --p-muted: #55514c;
+  --p-accent: #256f82; --p-accent-ink: #ffffff; --p-action: #256f82; --p-action-ink: #ffffff;
+  --p-inv-bg: #0a0a0a; --p-inv-surface: #151515; --p-inv-ink: #dedad3; --p-inv-muted: #84827e;
+  --p-inv-accent: #256f82; --p-inv-accent-ink: #ffffff; --p-inv-action: #256f82; --p-inv-action-ink: #ffffff;
+  --font-display: "Onest", system-ui, sans-serif;
+  --font-text: "Onest", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --display-weight: 400;
+  --display-tracking: -0.035em;
+  --display-tracking-xl: -0.04em;
+}
+</style>
+<link rel="stylesheet" href="/home/assets/ui/base.css">
+<link rel="stylesheet" href="/home/assets/ui/window/fragment.css">
+<link rel="stylesheet" href="/home/assets/ui/chat/fragment.css">
+<link rel="stylesheet" href="/home/assets/ui/checklist/fragment.css">
+<link rel="stylesheet" href="/home/assets/ui/notify/fragment.css">
+<link rel="stylesheet" href="/home/assets/ui/stat/fragment.css">
+<link rel="stylesheet" href="/home/assets/ui/toggles/fragment.css">
+<!-- the hero window's drawn rows (the kit's collage hero styles) -->
+<link rel="stylesheet" href="/home/assets/layout/demo.css">
+<script src="/home/assets/backgrounds/backgrounds.js"></script>
+<style>
+  #features .panel { --p-h: 300px; }
+  /* tablet: each card takes the full row (cards.md), two to a screen, the panels sharing what the words leave */
+  @media (min-width: 640px) and (max-width: 1023px) {
+    #features .card { grid-column: 1 / -1; }
+    #features .panel { --p-h: max(200px, calc((100svh - 600px) / 2)); }
+    #features > .wrap > .grid .panel { --p-h: max(200px, calc((100svh - 420px) / 2)); }
+    .app.ui.fill { flex: none; }
+  }
+  @media (max-width: 639px) { #features .panel { --p-h: 160px; } .ly-piece--main .d-row:nth-child(n+3) { display: none; } }
+  /* app-frame recipe (sections-library.md) */
+  .app.ui { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); margin-top: var(--s-7); background: var(--u-bg); border: 1px solid var(--u-border); border-radius: var(--u-r); box-shadow: var(--u-shadow); }
+  .app > .app__pane { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
+  .app > .app__pane + .app__pane { border-left: 1px solid var(--u-line); }
+  .app > .app__pane > .ui-panel { width: 100%; border: 0; border-radius: 0; box-shadow: none; }
+  .app > .app__pane::after { content: ""; position: absolute; inset: auto 0 0 0; height: 64px; background: linear-gradient(transparent, var(--u-bg)); pointer-events: none; }
+  @media (min-width: 1024px) and (max-width: 1279px) { .app.ui { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); } }
+  @media (max-width: 1023px) {
+    .app.ui { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+    .app > .app__pane--list { max-height: 252px; }
+    .app > .app__pane--list::after { display: none; }
+    .app .ui-win__side { display: none; }
+    .app .ui-win__body { grid-template-columns: minmax(0, 1fr); }
+    .app > .app__pane + .app__pane { border-left: 0; border-top: 1px solid var(--u-line); }
+  }
+  @media (max-width: 639px) {
+    .app.ui { grid-template-rows: minmax(0, 1fr); }
+    .app > .app__pane--list { display: none; }
+    .app > .app__pane + .app__pane { border-top: 0; }
+  }
+  /* collage hero (assets/layout/hero-collage.html): the lit ground, the note card, the window's cut room */
+  .hero__art { background:
+      radial-gradient(70% 60% at 18% 12%, color-mix(in oklab, var(--ground-surface) 80%, white), transparent 70%),
+      radial-gradient(60% 50% at 90% 100%, color-mix(in oklab, var(--ground-bg) 80%, var(--ground-accent)), transparent 70%),
+      var(--ground-bg); }
+  .hero__art > .ly-piece--note { left: var(--s-6); bottom: var(--s-6); width: 300px; z-index: 2; }
+  .d-note__line { display: flex; align-items: center; gap: 10px; padding: 7px 0; font-size: 13px; color: #3d4247; border-top: 1px solid rgb(0 0 0 / .06); }
+  .d-note__line:first-of-type { border-top: 0; }
+  .d-note__line i { width: 18px; height: 18px; border-radius: 50%; flex: none; display: grid; place-items: center; background: #e7f4ec; color: #17673f; font-style: normal; font-size: 13px; font-weight: 700; }
+  .d-note__line i.warn { background: #fdf0dc; color: #8a5300; }
+  .d-note__line b { font-weight: 500; color: #16181a; }
+  .hero__proof { font-size: var(--t-small); color: var(--muted); }
+  .hero__art::after { content: ""; position: absolute; inset: auto 0 0 0; height: 72px; background: linear-gradient(transparent, var(--ground-bg)); pointer-events: none; z-index: 1; }
+  .ly-piece--main .d-row { grid-template-columns: 36px minmax(0, 1fr) 56px 96px; }
+  .ly-piece--main .d-main { padding-right: var(--ly-cut-room); }
+  @media (max-width: 1279px) { .ly-piece--main .d-row { grid-template-columns: 36px minmax(0, 1fr) 96px; } .ly-piece--main .d-row .num { display: none; } }
+  @media (max-width: 1023px) { .hero__art > .ly-piece--note { left: var(--s-4); bottom: var(--s-4); width: 270px; } }
+  .d-thumb { display: grid; place-items: center; font-size: 13px; font-weight: 500; color: #16181a; }
+</style>
+</head>
+<body>
+<!-- type: software (site-kind software; a budgeting web app for university students)
+     deal: hero collage, nav nav-centre (nav-cards dealt; no photographs for its cards, so re-dealt to nav-centre),
+     close close-type, footer footer-columns, rhythm dark-band (the app-frame), buttons solid, mark initial,
+     palette putty-black-teal, type onest, radius soft, ground sky
+     effect, moments, scene: none (the hero card's step loop is the page's one moving piece besides the first feature card) -->
+
+<header class="nav nav--centre">
+  <div class="wrap nav__bar">
+    <a class="nav__logo" href="#top"><span class="mark mark--initial" aria-hidden="true">U</span>UniWallet</a>
+    <nav class="nav__links" aria-label="Main">
+      <div class="nav__item"><a class="nav__link" href="#features">Features</a></div>
+      <div class="nav__item"><a class="nav__link" href="#app">Dashboard</a></div>
+      <div class="nav__item"><a class="nav__link" href="#questions">Questions</a></div>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--primary" href="/onboarding">Get my forecast</a>
+    </div>
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-label="Menu">
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero hero--collage" aria-labelledby="hero-h">
+    <div class="wrap"><div class="hero-text grid hero__grid">
+      <div class="hero__text span-5">
+        <h1 id="hero-h">Budget forecaster for students</h1>
+        <p class="hero__lead">Enter your balance, pay schedule and bills. UniWallet shows what you will have left before payday and which bills to pay first.</p>
+        <div class="btn-row"><a class="btn btn--primary" href="/onboarding">Get my forecast<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a><a class="btn btn--secondary" href="#app">See the dashboard</a></div>
+        <p class="hero__proof">Free. Set up in 4 steps, with no account or password.</p>
+      </div>
+      <div class="hero__art span-7 start-6" role="img" aria-label="UniWallet's bill list with rent marked pay first, and a forecast showing $84.50 left before payday">
+        <div class="ly-piece ly-piece--main d-win" aria-hidden="true">
+          <div class="d-win__bar"><span class="d-win__dots"><i></i><i></i><i></i></span><span>UniWallet · Bills</span></div>
+          <div class="d-win__body">
+            <div class="d-side">
+              <span><i></i>Dashboard</span><span class="is-on"><i></i>Bills</span><span><i></i>Insights</span><span><i></i>Coach</span><span><i></i>Challenge</span>
+            </div>
+            <div class="d-main">
+              <div class="d-main__head"><h4>Bills before payday</h4><span class="d-btn">Add bill</span></div>
+              <div class="d-tabs"><span class="is-on">Unpaid 5</span><span>Due soon 3</span><span>Paid 2</span></div>
+              <div class="d-rows">
+                <div class="d-row"><span class="d-thumb" style="background:#e6dccb">R</span><div><b>Rent</b><small>Due in 6 days</small></div><span class="num">$750</span><span class="d-chip d-chip--out">Pay first</span></div>
+                <div class="d-row"><span class="d-thumb" style="background:#d7e3ea">P</span><div><b>Phone plan</b><small>Due in 8 days</small></div><span class="num">$45</span><span class="d-chip d-chip--low">Due soon</span></div>
+                <div class="d-row"><span class="d-thumb" style="background:#dfe6d6">T</span><div><b>Transit pass</b><small>Due in 8 days</small></div><span class="num">$128</span><span class="d-chip d-chip--low">Due soon</span></div>
+                <div class="d-row"><span class="d-thumb" style="background:#efe2d2">G</span><div><b>Groceries</b><small>Weekly</small></div><span class="num">$60</span><span class="d-chip d-chip--low">Due soon</span></div>
+                <div class="d-row"><span class="d-thumb" style="background:#e4dfe9">M</span><div><b>Music subscription</b><small>After payday</small></div><span class="num">$6.99</span><span class="d-chip">Can wait</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ly-piece ly-piece--note d-card" aria-hidden="true" data-ly-steps="700">
+          <div class="d-card__row"><h5>Forecast to payday</h5><span class="d-chip d-chip--low" data-step data-step-at="4">Tight</span></div>
+          <div class="d-note__line" data-step><i class="warn">!</i><span><b>$84.50</b> left after 4 bills</span></div>
+          <div class="d-note__line" data-step><i>✓</i><span><b>Rent</b> paid first, due in 6 days</span></div>
+          <div class="d-note__line" data-step><i>✓</i><span>Payday in <b>9 days</b></span></div>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="section g2 g2m" id="features" aria-labelledby="features-h">
+    <div class="wrap">
+      <div class="group">
+        <div class="section-head">
+          <h2 id="features-h">Budget tools for the weeks before payday</h2>
+        </div>
+        <div class="grid">
+          <article class="card card--row card--open span-6">
+            <h3>Ranks the bills to pay first</h3>
+            <p>Sorted by due date, then by your priority, so rent comes before a subscription.</p>
+            <div class="panel">
+              <div class="stage stage--fade-b"><div class="at-rise fit" style="--fit-max:340px;--ax:max(24px, 50% - 170px);--ay:40px;--ay-sm:40px" data-ui-loop>
+                <div class="ui ui-panel ui-checks" data-ui="checklist">
+                  <div class="ui-checks__head">
+                    <div class="ui-title">Pay before payday</div>
+                    <span class="ui-spacer"></span>
+                    <div class="ui-meta" data-checks-count>2 of 4</div>
+                  </div>
+                  <div class="ui-checks__bar"><i data-checks-bar style="--k:0.5"></i></div>
+                  <ul class="ui-checks__list">
+                    <li class="ui-check is-done"><span class="ui-check__box"><svg viewBox="0 0 16 16"><path d="m4.5 8.2 2.3 2.3 4.7-5"/></svg></span><span class="ui-check__label">Rent, $750</span></li>
+                    <li class="ui-check is-done"><span class="ui-check__box"><svg viewBox="0 0 16 16"><path d="m4.5 8.2 2.3 2.3 4.7-5"/></svg></span><span class="ui-check__label">Phone plan, $45</span></li>
+                    <li class="ui-check"><span class="ui-check__box"><svg viewBox="0 0 16 16"><path d="m4.5 8.2 2.3 2.3 4.7-5"/></svg></span><span class="ui-check__label">Transit pass, $128</span></li>
+                    <li class="ui-check"><span class="ui-check__box"><svg viewBox="0 0 16 16"><path d="m4.5 8.2 2.3 2.3 4.7-5"/></svg></span><span class="ui-check__label">Groceries, $60</span></li>
+                  </ul>
+                </div>
+              </div></div>
+            </div>
+          </article>
+          <article class="card card--row card--open span-6">
+            <h3>Warns before money runs short</h3>
+            <p>Under 20% of your balance left on payday turns the dashboard yellow.</p>
+            <div class="panel">
+              <div class="stage stage--fade-b"><div class="at-rise fit" style="--fit-max:380px;--ax:32px;--ay:calc(100% - 180px);--ay-sm:24px">
+                <div class="ui ui-notify" data-ui="notify">
+                  <ul class="ui-notify__list" data-notify-list>
+                    <li class="ui-note"><span class="ui-note__ico"><svg class="ui-icon" viewBox="0 0 16 16"><path d="M8 3v6M8 12v.5"/></svg></span><span class="ui-note__text"><span class="ui-note__title">Heads up, it’s tight<time>now</time></span><span class="ui-note__body">$84.50 left before payday</span></span></li>
+                    <li class="ui-note"><span class="ui-note__ico"><svg class="ui-icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3l2 1.5"/></svg></span><span class="ui-note__text"><span class="ui-note__title">Rent is due in 6 days<time>1h</time></span><span class="ui-note__body">$750, pay this one first</span></span></li>
+                    <li class="ui-note"><span class="ui-note__ico"><svg class="ui-icon" viewBox="0 0 16 16"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg></span><span class="ui-note__text"><span class="ui-note__title">Phone plan paid<time>2d</time></span><span class="ui-note__body">$45 marked as paid</span></span></li>
+                  </ul>
+                </div>
+              </div></div>
+            </div>
+          </article>
+        </div>
+      </div>
+      <div class="grid">
+        <article class="card card--row card--open span-6">
+          <h3>Shows what your bills take</h3>
+          <p>Insights split your balance into bills and money that is safe to spend.</p>
+          <div class="panel">
+            <div class="stage stage--fade-br"><div class="at-corner" style="--ax:24px;--ay:40px;--ay-sm:40px">
+              <div class="ui ui-panel ui-stat" data-ui="stat" data-from="74" data-to="82" data-suffix="%">
+                <div class="ui-stat__head">
+                  <div class="ui-stat__top">
+                    <span class="ui-stat__label">Balance committed to bills</span>
+                    <span class="ui-stat__range">This pay period<svg class="ui-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 6.5 3.5 3.5 3.5-3.5"/></svg></span>
+                  </div>
+                  <div class="ui-stat__line">
+                    <span class="ui-stat__num" data-stat-num>82%</span>
+                    <span class="ui-chip ui-chip--plain ui-stat__delta"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 9.5v-7M3 5.5l3-3 3 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>8 pts</span>
+                    <span class="ui-stat__sub">vs. last pay period</span>
+                  </div>
+                </div>
+                <div class="ui-stat__chart">
+                  <svg class="ui-stat__svg" viewBox="0 0 400 120" preserveAspectRatio="none" aria-hidden="true">
+                    <path class="ui-stat__grid" d="M0 30.5H400M0 60.5H400M0 90.5H400"/>
+                    <path class="ui-stat__cover" fill-rule="evenodd" d=""/>
+                    <g class="ui-stat__bars"><rect rx="3" x="0.00" y="49.04" width="21.14" height="70.96"/><rect rx="3" x="29.14" y="40.86" width="21.14" height="79.14"/><rect rx="3" x="58.29" y="44.95" width="21.14" height="75.05"/><rect rx="3" x="87.43" y="36.76" width="21.14" height="83.24"/><rect rx="3" x="116.57" y="42.22" width="21.14" height="77.78"/><rect rx="3" x="145.71" y="34.04" width="21.14" height="85.96"/><rect rx="3" x="174.86" y="38.13" width="21.14" height="81.87"/><rect rx="3" x="204.00" y="29.94" width="21.14" height="90.06"/><rect rx="3" x="233.14" y="35.40" width="21.14" height="84.60"/><rect rx="3" x="262.29" y="25.85" width="21.14" height="94.15"/><rect rx="3" x="291.43" y="31.31" width="21.14" height="88.69"/><rect rx="3" x="320.57" y="23.12" width="21.14" height="96.88"/><rect rx="3" x="349.71" y="27.21" width="21.14" height="92.79"/><rect rx="3" x="378.86" y="16.30" width="21.14" height="103.70"/></g>
+                  </svg>
+                  <div class="ui-stat__axis" aria-hidden="true"><span>Last payday</span><span>This week</span><span>Today</span></div>
+                </div>
+              </div>
+            </div></div>
+          </div>
+        </article>
+        <article class="card card--row card--open span-6">
+          <h3>Sets one challenge a week</h3>
+          <p>Pick no takeout or under $30 on food, and track it until payday.</p>
+          <div class="panel">
+            <div class="stage stage--fade-b"><div class="at-right to-edge" style="--ax:32px;--ay:56px;--ay-sm:56px">
+              <div class="ui ui-panel ui-toggles" data-ui="toggles">
+                <div class="ui-head">
+                  <svg class="ui-icon ui-toggles__ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8 13 4v3.6c0 3-2.1 5.4-5 6.6-2.9-1.2-5-3.6-5-6.6V4z"/><path d="m5.8 8 1.6 1.6 3-3.2"/></svg>
+                  <div class="ui-title">This week’s challenge</div>
+                  <span class="ui-spacer"></span>
+                  <div class="ui-meta" data-tg-count>1 of 3 on</div>
+                </div>
+                <ul class="ui-toggles__list">
+                  <li class="ui-tg">
+                    <span class="ui-tg__text"><span class="ui-tg__label">No takeout this week</span><span class="ui-tg__sub">Cook at home until payday</span></span>
+                    <button class="ui-switch is-on" type="button" role="switch" aria-checked="true" aria-label="No takeout this week"><i></i></button>
+                  </li>
+                  <li class="ui-tg">
+                    <span class="ui-tg__text"><span class="ui-tg__label">Under $30 on food</span><span class="ui-tg__sub">Plan meals for 7 days</span></span>
+                    <button class="ui-switch" type="button" role="switch" aria-checked="false" aria-label="Under 30 dollars on food"><i></i></button>
+                  </li>
+                  <li class="ui-tg">
+                    <span class="ui-tg__text"><span class="ui-tg__label">No non-essentials</span><span class="ui-tg__sub">Rent, groceries and bills only</span></span>
+                    <button class="ui-switch" type="button" role="switch" aria-checked="false" aria-label="No non-essential spending"><i></i></button>
+                  </li>
+                </ul>
+              </div>
+            </div></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section ground-inverse" id="app" aria-labelledby="app-h">
+    <div class="wrap">
+      <div class="grid">
+        <h2 id="app-h" class="span-5">Your bills and budget coach in one place</h2>
+        <p class="span-7 start-6">Bills sit on the left in the order to pay them. Ask the coach on the right, and it answers with your own balance and due dates. <a class="link" href="#questions">Read how the forecast works</a></p>
+      </div>
+      <div class="ui app fill" role="img" aria-label="UniWallet with the bill list beside a coach conversation about affording concert tickets" data-ui-pause-host>
+        <div class="app__pane app__pane--list">
+          <div class="ui ui-panel ui-win" data-ui="window" data-open="Unpaid" data-work="Paying" data-done="Paid">
+            <div class="ui-win__bar">
+              <span class="ui-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="ui-win__crumb">UniWallet <i>/</i> <b>Bills</b></span>
+              <span class="ui-spacer"></span>
+              <span class="ui-win__search" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg><span class="ui-win__ph">Search</span><span class="ui-kbd">/</span></span>
+            </div>
+            <div class="ui-win__body">
+              <nav class="ui-win__side" aria-hidden="true">
+                <span class="ui-win__nav is-on"><svg class="ui-icon" viewBox="0 0 16 16"><path d="M2.5 9h3l1 1.5h3l1-1.5h3"/><path d="M2.5 9 4 3.5h8L13.5 9v3.5h-11z"/></svg>Unpaid<em>6</em></span>
+                <span class="ui-win__nav"><svg class="ui-icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3l2 1.5"/></svg>Due soon<em>3</em></span>
+                <span class="ui-win__nav"><svg class="ui-icon" viewBox="0 0 16 16"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg>Paid<em>3</em></span>
+                <span class="ui-win__label">Categories</span>
+                <span class="ui-win__nav"><span class="ui-win__hash">#</span>Housing</span>
+                <span class="ui-win__nav"><span class="ui-win__hash">#</span>Subscriptions</span>
+              </nav>
+              <div class="ui-win__main">
+                <div class="ui-win__cols" aria-hidden="true"><span>Bill</span><span>Due</span><span>Status</span><span>Amount</span></div>
+                <ul class="ui-win__rows">
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="1">R</span><span class="ui-win__who">Rent</span><span class="ui-win__sub">Housing · due in 6 days</span><span class="ui-win__st is-you" data-st>Pay first</span><span class="ui-win__age">$750</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="3">P</span><span class="ui-win__who">Phone plan</span><span class="ui-win__sub">Phone · due in 8 days</span><span class="ui-win__st" data-st>Unpaid</span><span class="ui-win__age">$45</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="4">T</span><span class="ui-win__who">Transit pass</span><span class="ui-win__sub">Transit · due in 8 days</span><span class="ui-win__st" data-st>Unpaid</span><span class="ui-win__age">$128</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="2">G</span><span class="ui-win__who">Groceries</span><span class="ui-win__sub">Groceries · weekly</span><span class="ui-win__st" data-st>Unpaid</span><span class="ui-win__age">$60</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="5">M</span><span class="ui-win__who">Music subscription</span><span class="ui-win__sub">Subscriptions · after payday</span><span class="ui-win__st" data-st>Unpaid</span><span class="ui-win__age">$6.99</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="3">H</span><span class="ui-win__who">Hydro</span><span class="ui-win__sub">Utilities · after payday</span><span class="ui-win__st" data-st>Unpaid</span><span class="ui-win__age">$38</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="1">T</span><span class="ui-win__who">Tuition instalment</span><span class="ui-win__sub">Tuition · paid</span><span class="ui-win__st is-done" data-st>Paid</span><span class="ui-win__age">$1,200</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="4">I</span><span class="ui-win__who">Renter’s insurance</span><span class="ui-win__sub">Insurance · paid</span><span class="ui-win__st is-done" data-st>Paid</span><span class="ui-win__age">$18</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="2">G</span><span class="ui-win__who">Gym</span><span class="ui-win__sub">Other · paid</span><span class="ui-win__st is-done" data-st>Paid</span><span class="ui-win__age">$25</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="app__pane app__pane--open" data-ui-loop>
+          <div class="ui ui-panel ui-chat" data-ui="chat">
+            <div class="ui-head">
+              <span class="ui-agent" aria-hidden="true"></span>
+              <div class="ui-title">Money coach</div>
+              <span class="ui-chat__online">Online</span>
+              <span class="ui-spacer"></span>
+            </div>
+            <div class="ui-chat__body">
+              <div class="ui-chat__day">Today</div>
+              <div class="ui-msg ui-msg--me" data-chat-q>
+                <span class="ui-msg__text">Can I afford $90 concert tickets this week?</span>
+              </div>
+              <div class="ui-msg ui-msg--bot" data-chat-a>
+                <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                <span class="ui-msg__col">
+                  <span class="ui-chat__answer">Not before payday. After rent, your phone plan, transit and groceries you have <b>$84.50</b> left for 9 days. Payday is the safer time to buy them.</span>
+                  <span class="ui-chat__srcs">
+                    <span class="ui-chat__src"><svg class="ui-icon" viewBox="0 0 16 16"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></svg>Your bills</span>
+                    <span class="ui-chat__src"><svg class="ui-icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3l2 1.5"/></svg>Next payday</span>
+                  </span>
+                </span>
+              </div>
+              <div class="ui-msg ui-msg--me">
+                <span class="ui-msg__text">Okay, I’ll wait until payday.</span>
+              </div>
+              <div class="ui-msg ui-msg--me">
+                <span class="ui-msg__text">What can I cut this week?</span>
+              </div>
+              <div class="ui-msg ui-msg--bot">
+                <span class="ui-agent ui-msg__av" aria-hidden="true"></span>
+                <span class="ui-msg__col"><span class="ui-chat__answer">Takeout is your biggest extra. This week’s challenge, no takeout, would keep about <b>$40</b> for groceries.</span></span>
+              </div>
+            </div>
+            <div class="ui-chat__input">
+              <span class="ui-chat__ph">Ask about your money</span>
+              <span class="ui-chat__send" aria-hidden="true"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M8 13V3.5M3.8 7.5 8 3.3l4.2 4.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="questions" aria-labelledby="questions-h">
+    <div class="wrap">
+      <div class="grid grid--top">
+        <div class="span-5 stack-4">
+          <h2 id="questions-h">Questions</h2>
+          <p class="muted">How the forecast works and what UniWallet keeps.</p>
+        </div>
+        <div class="faq span-7 start-6">
+          <div class="faq__item"><h3>Do I need an account?</h3><p>No. Your browser keeps only a user ID; your bills are saved on the UniWallet server.</p></div>
+          <div class="faq__item"><h3>How is the forecast worked out?</h3><p>Your balance minus every unpaid bill due before your next payday. Under 20% left is a warning; below zero is over budget.</p></div>
+          <div class="faq__item"><h3>Does it connect to my bank?</h3><p>No. You type in your balance, income and bills yourself.</p></div>
+          <div class="faq__item"><h3>What does the coach read?</h3><p>Your balance, income and bills. If the AI service is down, it answers with built-in rules.</p></div>
+          <div class="faq__item"><h3>Can I start over?</h3><p>Yes. Start over in the sidebar forgets this browser’s user.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer closing" id="contact" aria-labelledby="close-h">
+  <div class="wrap">
+    <div class="closing__cta close--type">
+      <div class="section-head">
+        <h2 id="close-h">Get your budget forecast before payday</h2>
+        <p class="t-small muted">Free. Set up in 4 steps, with no account or password.</p>
+      </div>
+      <a class="btn btn--primary btn--xl btn--wide" href="/onboarding">Get my forecast<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
+    </div>
+    <div class="closing__links">
+      <div class="grid">
+        <div class="span-4 stack-4">
+          <a class="nav__logo" href="#top"><span class="mark mark--initial" aria-hidden="true">U</span>UniWallet</a>
+          <p class="footer__lede">Budget forecasts for students.</p>
+        </div>
+        <div class="span-2 footer__col"><h4>Features</h4><ul><li><a href="#features">Bills and warnings</a></li></ul></div>
+        <div class="span-2 footer__col"><h4>Dashboard</h4><ul><li><a href="#app">Bills and coach</a></li></ul></div>
+        <div class="span-2 footer__col"><h4>Questions</h4><ul><li><a href="#questions">Forecast and data</a></li></ul></div>
+        <div class="span-2 footer__col"><h4>Code</h4><ul><li><a href="https://github.com/shayanb18/road2profits">Source on GitHub</a></li></ul></div>
+      </div>
+      <div class="footer__legal">
+        <span>&copy; 2026 UniWallet</span>
+        <div class="socials"></div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script type="module" src="/home/assets/system.js"></script>
+<script type="module" src="/home/assets/motion/motion.js"></script>
+<script type="module" src="/home/assets/layout/layout.js"></script>
+</body>
+</html>
