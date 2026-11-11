@@ -97,7 +97,7 @@ function CoachAvatar() {
   return (
     <div
       className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mr-3 mt-0.5"
-      style={{ background: "#1a1a1a", color: "#3b82f6", border: "1px solid #2a2a2a" }}
+      style={{ background: "var(--uw-raised)", color: "var(--uw-accent-text)", border: "1px solid var(--uw-line)" }}
     >
       <ChatBubbleLeftRightIcon aria-hidden className="w-3.5 h-3.5" />
     </div>
@@ -161,22 +161,22 @@ export default function CoachPage() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-dvh overflow-hidden font-sans" style={{ background: "#0a0a0a", color: "#f0f0f0" }}>
+    <div className="flex flex-col md:flex-row h-dvh overflow-hidden font-sans" style={{ background: "var(--uw-bg)", color: "var(--uw-ink)" }}>
       <Sidebar balance={profile?.currentBalance} />
 
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         {/* Top bar */}
         <div
           className="flex items-center justify-between gap-4 px-4 md:px-8 py-4 shrink-0"
-          style={{ borderBottom: "1px solid #1a1a1a" }}
+          style={{ borderBottom: "1px solid var(--uw-line)" }}
         >
           <div>
             <h1 className="text-[15px] font-semibold text-white leading-none mb-0.5">Ask Your Money Coach</h1>
-            <p className="text-[12px]" style={{ color: "#555" }}>Straight talk, no jargon</p>
+            <p className="text-[12px]" style={{ color: "var(--uw-faint)" }}>Straight talk, no jargon</p>
           </div>
           <div
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
-            style={aiDown ? { background: "#141414", border: "1px solid #222" } : { background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.15)" }}
+            style={aiDown ? { background: "var(--uw-surface)", border: "1px solid var(--uw-line)" } : { background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.15)" }}
             title={aiDown ? "The AI coach is unavailable, so replies come from built-in rules." : undefined}
           >
             <div className={`w-1.5 h-1.5 rounded-full ${aiDown ? "" : "animate-pulse"}`} style={{ background: aiDown ? "#555" : "#22c55e" }} />
@@ -187,26 +187,26 @@ export default function CoachPage() {
         {/* Suggested prompts */}
         <div
           className="flex items-center gap-2.5 px-4 md:px-8 py-3 shrink-0 overflow-x-auto"
-          style={{ borderBottom: "1px solid #141414" }}
+          style={{ borderBottom: "1px solid var(--uw-line)" }}
         >
-          <span className="text-[11px] shrink-0" style={{ color: "#444" }}>Try:</span>
+          <span className="text-[11px] shrink-0" style={{ color: "var(--uw-faint)" }}>Try:</span>
           {SUGGESTED_PROMPTS.map((prompt) => (
             <button
               key={prompt}
               onClick={() => send(prompt)}
               className="shrink-0 px-3.5 py-1.5 rounded-full text-[12px] font-medium transition-all duration-100"
               style={{
-                background: "rgba(59,130,246,0.08)",
-                color: "#3b82f6",
-                border: "1px solid rgba(59,130,246,0.2)",
+                background: "rgb(37 111 130 / 0.08)",
+                color: "var(--uw-accent-text)",
+                border: "1px solid rgb(37 111 130 / 0.2)",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(59,130,246,0.15)";
-                e.currentTarget.style.borderColor = "rgba(59,130,246,0.4)";
+                e.currentTarget.style.background = "rgb(37 111 130 / 0.15)";
+                e.currentTarget.style.borderColor = "rgb(37 111 130 / 0.4)";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = "rgba(59,130,246,0.08)";
-                e.currentTarget.style.borderColor = "rgba(59,130,246,0.2)";
+                e.currentTarget.style.background = "rgb(37 111 130 / 0.08)";
+                e.currentTarget.style.borderColor = "rgb(37 111 130 / 0.2)";
               }}
             >
               {prompt}
@@ -228,8 +228,8 @@ export default function CoachPage() {
                 className="max-w-lg rounded-2xl px-4 py-3"
                 style={
                   msg.role === "user"
-                    ? { background: "#3b82f6", color: "#fff", borderBottomRightRadius: 4 }
-                    : { background: "#141414", color: "#ddd", border: "1px solid #222", borderBottomLeftRadius: 4 }
+                    ? { background: "var(--uw-accent)", color: "#fff", borderBottomRightRadius: 4 }
+                    : { background: "var(--uw-surface)", color: "var(--uw-ink)", border: "1px solid var(--uw-line)", borderBottomLeftRadius: 4 }
                 }
               >
                 <p className="text-[14px] leading-relaxed">{msg.text}</p>
@@ -243,13 +243,13 @@ export default function CoachPage() {
               <CoachAvatar />
               <div
                 className="rounded-2xl px-4 py-3 flex items-center gap-1"
-                style={{ background: "#141414", border: "1px solid #222", borderBottomLeftRadius: 4 }}
+                style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)", borderBottomLeftRadius: 4 }}
               >
                 {[0, 1, 2].map((i) => (
                   <div
                     key={i}
                     className="w-1.5 h-1.5 rounded-full animate-bounce"
-                    style={{ background: "#555", animationDelay: `${i * 0.15}s` }}
+                    style={{ background: "var(--uw-faint)", animationDelay: `${i * 0.15}s` }}
                   />
                 ))}
               </div>
@@ -260,7 +260,7 @@ export default function CoachPage() {
         </div>
 
         {/* Input */}
-        <div className="shrink-0 px-4 md:px-8 py-4" style={{ borderTop: "1px solid #1a1a1a" }}>
+        <div className="shrink-0 px-4 md:px-8 py-4" style={{ borderTop: "1px solid var(--uw-line)" }}>
           <form onSubmit={handleSubmit} className="flex items-center gap-3">
             <input
               ref={inputRef}
@@ -270,24 +270,24 @@ export default function CoachPage() {
               placeholder="Ask about your money..."
               className="flex-1 rounded-xl px-4 py-3 text-[14px] outline-none transition-colors"
               style={{
-                background: "#111",
-                border: "1px solid #222",
-                color: "#f0f0f0",
+                background: "var(--uw-surface)",
+                border: "1px solid var(--uw-line)",
+                color: "var(--uw-ink)",
                 colorScheme: "dark",
               }}
-              onFocus={(e) => (e.currentTarget.style.borderColor = "#333")}
-              onBlur={(e) => (e.currentTarget.style.borderColor = "#222")}
+              onFocus={(e) => (e.currentTarget.style.borderColor = "var(--uw-line)")}
+              onBlur={(e) => (e.currentTarget.style.borderColor = "var(--uw-line)")}
             />
             <button
               type="submit"
               disabled={!input.trim() || typing}
               className="px-5 py-3 rounded-xl text-[13px] font-semibold transition-all duration-100 disabled:opacity-30 disabled:cursor-not-allowed"
-              style={{ background: "#3b82f6", color: "#fff" }}
+              style={{ background: "var(--uw-accent)", color: "#fff" }}
               onMouseEnter={(e) => {
-                if (!e.currentTarget.disabled) e.currentTarget.style.background = "#2563eb";
+                if (!e.currentTarget.disabled) e.currentTarget.style.background = "var(--uw-accent-hover)";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = "#3b82f6";
+                e.currentTarget.style.background = "var(--uw-accent)";
               }}
             >
               Send

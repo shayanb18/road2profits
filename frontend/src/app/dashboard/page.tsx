@@ -35,13 +35,13 @@ const STATUS_CFG = {
 const PRIORITY_CFG = {
   high: { dot: "#ef4444", label: "high" },
   medium: { dot: "#eab308", label: "med" },
-  low: { dot: "#6b7280", label: "low" },
+  low: { dot: "var(--uw-muted)", label: "low" },
 };
 
 const INSIGHT_CFG = {
   danger: { border: "#ef4444", bg: "rgba(239,68,68,0.07)", Icon: ExclamationTriangleIcon, color: "#ef4444" },
   warning: { border: "#eab308", bg: "rgba(234,179,8,0.07)", Icon: ExclamationCircleIcon, color: "#eab308" },
-  tip: { border: "#3b82f6", bg: "rgba(59,130,246,0.07)", Icon: LightBulbIcon, color: "#3b82f6" },
+  tip: { border: "var(--uw-accent)", bg: "rgb(37 111 130 / 0.07)", Icon: LightBulbIcon, color: "var(--uw-accent-text)" },
 };
 
 // ─── Loading screen ───────────────────────────────────────────────────────────
@@ -62,22 +62,22 @@ export default function DashboardPage() {
   const s = STATUS_CFG[forecast.status];
 
   return (
-    <div className="flex flex-col md:flex-row h-dvh overflow-hidden font-sans" style={{ background: "#0a0a0a", color: "#f0f0f0" }}>
+    <div className="flex flex-col md:flex-row h-dvh overflow-hidden font-sans" style={{ background: "var(--uw-bg)", color: "var(--uw-ink)" }}>
       <Sidebar balance={profile?.currentBalance} />
 
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         {/* Top bar */}
         <div
           className="flex items-center justify-between gap-4 px-4 md:px-8 py-4 shrink-0"
-          style={{ borderBottom: "1px solid #1a1a1a" }}
+          style={{ borderBottom: "1px solid var(--uw-line)" }}
         >
           <div>
             <h1 className="text-[15px] font-semibold text-white leading-none mb-0.5">Dashboard</h1>
-            <p className="text-[12px]" style={{ color: "#555" }}>Your financial snapshot</p>
+            <p className="text-[12px]" style={{ color: "var(--uw-faint)" }}>Your financial snapshot</p>
           </div>
           <span
             className="text-[11px] px-3 py-1.5 rounded-lg"
-            style={{ background: "#111", color: "#444", border: "1px solid #222" }}
+            style={{ background: "var(--uw-surface)", color: "var(--uw-faint)", border: "1px solid var(--uw-line)" }}
           >
             {new Date().toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" })}
           </span>
@@ -114,7 +114,7 @@ export default function DashboardPage() {
                   {s.label}
                 </p>
                 <div className="mt-4">
-                  <p className="text-[11px] uppercase tracking-widest mb-1" style={{ color: "#555" }}>
+                  <p className="text-[11px] uppercase tracking-widest mb-1" style={{ color: "var(--uw-faint)" }}>
                     You&apos;ll have this much before payday
                   </p>
                   <p className="text-4xl font-bold tabular-nums" style={{ color: forecast.projectedBalance < 0 ? "#ef4444" : "#f0f0f0" }}>
@@ -130,7 +130,7 @@ export default function DashboardPage() {
                 style={{ borderColor: "rgba(255,255,255,0.06)" }}
               >
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "#555" }}>
+                  <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "var(--uw-faint)" }}>
                     Current balance
                   </p>
                   <p className="text-xl font-semibold text-white tabular-nums">
@@ -138,7 +138,7 @@ export default function DashboardPage() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "#555" }}>
+                  <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "var(--uw-faint)" }}>
                     Next payday
                   </p>
                   <p className="text-xl font-semibold text-white">
@@ -149,19 +149,19 @@ export default function DashboardPage() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "#555" }}>
+                  <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "var(--uw-faint)" }}>
                     Next bill due
                   </p>
                   <p className="text-xl font-semibold text-white">
                     {forecast.nextBillDue ? (
                       <>
                         {forecast.nextBillDue.name}{" "}
-                        <span className="text-[15px] font-normal" style={{ color: "#666" }}>
+                        <span className="text-[15px] font-normal" style={{ color: "var(--uw-muted)" }}>
                           ${forecast.nextBillDue.amount}
                         </span>
                       </>
                     ) : (
-                      <span style={{ color: "#555" }}>None</span>
+                      <span style={{ color: "var(--uw-faint)" }}>None</span>
                     )}
                   </p>
                 </div>
@@ -173,12 +173,12 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
             {/* Bills priority */}
-            <div className="rounded-2xl overflow-hidden" style={{ background: "#111", border: "1px solid #222" }}>
-              <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid #1a1a1a" }}>
-                <p className="text-[11px] uppercase tracking-[0.16em] font-medium" style={{ color: "#666" }}>
+            <div className="rounded-2xl overflow-hidden" style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)" }}>
+              <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid var(--uw-line)" }}>
+                <p className="text-[11px] uppercase tracking-[0.16em] font-medium" style={{ color: "var(--uw-muted)" }}>
                   Bills Priority
                 </p>
-                <span className="text-[10px]" style={{ color: "#333" }}>by due date</span>
+                <span className="text-[10px]" style={{ color: "var(--uw-faint)" }}>by due date</span>
               </div>
               {forecast.prioritizedBills.length > 0 ? (
                 <>
@@ -192,11 +192,11 @@ export default function DashboardPage() {
                           style={{ background: i === 0 ? "rgba(255,255,255,0.04)" : "transparent" }}
                         >
                           <div className="flex items-center gap-3">
-                            <span className="text-[10px] font-mono w-4 tabular-nums text-center" style={{ color: "#333" }}>
+                            <span className="text-[10px] font-mono w-4 tabular-nums text-center" style={{ color: "var(--uw-faint)" }}>
                               {i + 1}
                             </span>
                             <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: pc.dot }} />
-                            <span className="text-[13px] font-medium" style={{ color: i === 0 ? "#f0f0f0" : "#888" }}>
+                            <span className="text-[13px] font-medium" style={{ color: i === 0 ? "var(--uw-ink)" : "var(--uw-muted)" }}>
                               {bill.name}
                             </span>
                             <span
@@ -213,27 +213,27 @@ export default function DashboardPage() {
                       );
                     })}
                   </div>
-                  <div className="px-5 py-3 flex justify-between" style={{ borderTop: "1px solid #1a1a1a" }}>
-                    <span className="text-[11px] uppercase tracking-widest" style={{ color: "#444" }}>Total</span>
-                    <span className="text-[13px] font-semibold tabular-nums" style={{ color: "#888" }}>
+                  <div className="px-5 py-3 flex justify-between" style={{ borderTop: "1px solid var(--uw-line)" }}>
+                    <span className="text-[11px] uppercase tracking-widest" style={{ color: "var(--uw-faint)" }}>Total</span>
+                    <span className="text-[13px] font-semibold tabular-nums" style={{ color: "var(--uw-muted)" }}>
                       ${forecast.prioritizedBills.reduce((s, b) => s + b.amount, 0)}
                     </span>
                   </div>
                 </>
               ) : (
                 <div className="px-5 py-10 text-center">
-                  <p className="text-[13px]" style={{ color: "#444" }}>No upcoming bills.</p>
+                  <p className="text-[13px]" style={{ color: "var(--uw-faint)" }}>No upcoming bills.</p>
                 </div>
               )}
             </div>
 
             {/* Insights */}
-            <div className="rounded-2xl overflow-hidden" style={{ background: "#111", border: "1px solid #222" }}>
-              <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid #1a1a1a" }}>
-                <p className="text-[11px] uppercase tracking-[0.16em] font-medium" style={{ color: "#666" }}>
+            <div className="rounded-2xl overflow-hidden" style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)" }}>
+              <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid var(--uw-line)" }}>
+                <p className="text-[11px] uppercase tracking-[0.16em] font-medium" style={{ color: "var(--uw-muted)" }}>
                   Insights
                 </p>
-                <span className="text-[10px]" style={{ color: "#333" }}>
+                <span className="text-[10px]" style={{ color: "var(--uw-faint)" }}>
                   {forecast.insights.length} alert{forecast.insights.length !== 1 ? "s" : ""}
                 </span>
               </div>
@@ -248,30 +248,30 @@ export default function DashboardPage() {
                         style={{ background: ic.bg, border: `1px solid ${ic.border}20`, borderLeft: `3px solid ${ic.border}` }}
                       >
                         <ic.Icon aria-hidden className="w-4 h-4 shrink-0 mt-0.5" style={{ color: ic.color }} />
-                        <p className="text-[13px] leading-snug" style={{ color: "#ccc" }}>{insight.message}</p>
+                        <p className="text-[13px] leading-snug" style={{ color: "var(--uw-ink)" }}>{insight.message}</p>
                       </div>
                     );
                   })
                 ) : (
-                  <p className="text-[13px] text-center py-4" style={{ color: "#444" }}>No alerts. Looking good.</p>
+                  <p className="text-[13px] text-center py-4" style={{ color: "var(--uw-faint)" }}>No alerts. Looking good.</p>
                 )}
               </div>
             </div>
 
             {/* Recommendations */}
-            <div className="rounded-2xl overflow-hidden" style={{ background: "#111", border: "1px solid #222" }}>
-              <div className="px-5 py-4" style={{ borderBottom: "1px solid #1a1a1a" }}>
-                <p className="text-[11px] uppercase tracking-[0.16em] font-medium" style={{ color: "#666" }}>
+            <div className="rounded-2xl overflow-hidden" style={{ background: "var(--uw-surface)", border: "1px solid var(--uw-line)" }}>
+              <div className="px-5 py-4" style={{ borderBottom: "1px solid var(--uw-line)" }}>
+                <p className="text-[11px] uppercase tracking-[0.16em] font-medium" style={{ color: "var(--uw-muted)" }}>
                   What to do
                 </p>
               </div>
               <div className="p-4 space-y-3">
                 {forecast.recommendations.map((rec, i) => (
                   <div key={i} className="flex items-start gap-3">
-                    <span className="text-[11px] font-mono shrink-0 mt-0.5 tabular-nums" style={{ color: "#333" }}>
+                    <span className="text-[11px] font-mono shrink-0 mt-0.5 tabular-nums" style={{ color: "var(--uw-faint)" }}>
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <p className="text-[13px] leading-snug" style={{ color: "#999" }}>{rec}</p>
+                    <p className="text-[13px] leading-snug" style={{ color: "var(--uw-muted)" }}>{rec}</p>
                   </div>
                 ))}
               </div>
@@ -283,28 +283,28 @@ export default function DashboardPage() {
             href="/coach"
             className="flex items-center justify-between px-6 py-4 rounded-2xl transition-all duration-150"
             style={{
-              background: "rgba(59,130,246,0.08)",
-              border: "1px solid rgba(59,130,246,0.2)",
+              background: "rgb(37 111 130 / 0.08)",
+              border: "1px solid rgb(37 111 130 / 0.2)",
               textDecoration: "none",
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "rgba(59,130,246,0.13)";
-              (e.currentTarget as HTMLElement).style.borderColor = "rgba(59,130,246,0.35)";
+              (e.currentTarget as HTMLElement).style.background = "rgb(37 111 130 / 0.13)";
+              (e.currentTarget as HTMLElement).style.borderColor = "rgb(37 111 130 / 0.35)";
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "rgba(59,130,246,0.08)";
-              (e.currentTarget as HTMLElement).style.borderColor = "rgba(59,130,246,0.2)";
+              (e.currentTarget as HTMLElement).style.background = "rgb(37 111 130 / 0.08)";
+              (e.currentTarget as HTMLElement).style.borderColor = "rgb(37 111 130 / 0.2)";
             }}
           >
             <div>
-              <p className="text-[14px] font-semibold" style={{ color: "#3b82f6" }}>
+              <p className="text-[14px] font-semibold" style={{ color: "var(--uw-accent-text)" }}>
                 Chat with your AI Coach
               </p>
-              <p className="text-[12px] mt-0.5" style={{ color: "#555" }}>
+              <p className="text-[12px] mt-0.5" style={{ color: "var(--uw-faint)" }}>
                 Ask anything about your money — no jargon, just honest answers
               </p>
             </div>
-            <span className="text-[20px] shrink-0 ml-4" style={{ color: "#3b82f6" }}>→</span>
+            <span className="text-[20px] shrink-0 ml-4" style={{ color: "var(--uw-accent-text)" }}>→</span>
           </Link>
 
           <div className="md:hidden pt-4">

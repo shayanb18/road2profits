@@ -613,8 +613,9 @@ Returns single module.
 ```
 road2profits/
 ├── frontend/                  # Next.js web app (calls the backend, see "How they connect")
+│   ├── public/home/           # Landing page at / (static HTML, served by a rewrite in next.config.ts)
 │   └── src/
-│       ├── app/               # Pages: onboarding, dashboard, bills, coach, challenge, insights
+│       ├── app/               # Pages: onboarding, dashboard, bills, coach, challenge, insights; colour tokens (--uw-*) in globals.css
 │       ├── components/        # Sidebar (bottom tab bar on phones), Loading
 │       ├── hooks/useProfile.ts # Loads profile + bills from the API
 │       ├── lib/api.ts         # Typed API client
